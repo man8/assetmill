@@ -51,7 +51,7 @@ assets:
 
       expect(config.source.images).toContain(path.resolve(testConfigDir, 'logo.svg'));
       expect(path.isAbsolute(config.output.directory)).toBe(true);
-      expect(config.output.directory).toBe(path.resolve(testConfigDir, 'test-assets'));
+      expect(config.output.directory).toBe(path.resolve(process.cwd(), 'test-assets'));
       expect(config.assets).toHaveLength(1);
       expect(config.assets[0].name).toBe('test-favicon');
     });
@@ -64,7 +64,7 @@ assets:
       const config = await ConfigLoader.load(testConfigPath);
       
       expect(path.isAbsolute(config.output.directory)).toBe(true);
-      expect(config.output.directory).toBe(path.resolve(testConfigDir, 'test-assets'));
+      expect(config.output.directory).toBe(path.resolve(process.cwd(), 'test-assets'));
       
       config.source.images.forEach(imagePath => {
         expect(path.isAbsolute(imagePath)).toBe(true);
@@ -115,7 +115,7 @@ assets:
       }
     });
 
-    it('should resolve relative output directory relative to config file location', async () => {
+    it('should resolve relative output directory relative to working directory', async () => {
       const relativeConfigPath = path.join(testConfigDir, 'relative-paths.yml');
       const relativeOutputDir = '../relative-output';
       const relativeImagePath = '../relative-logo.svg';
@@ -161,7 +161,7 @@ assets:
           const config = await ConfigLoader.load(relativeConfigPath);
           
           expect(path.isAbsolute(config.output.directory)).toBe(true);
-          expect(config.output.directory).toBe(path.resolve(testConfigDir, relativeOutputDir));
+          expect(config.output.directory).toBe(path.resolve(process.cwd(), relativeOutputDir));
           expect(path.isAbsolute(config.source.images[0])).toBe(true);
           expect(config.source.images[0]).toBe(path.resolve(testConfigDir, relativeImagePath));
         } finally {
