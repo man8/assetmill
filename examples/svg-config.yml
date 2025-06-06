@@ -1,0 +1,82 @@
+# Example configuration demonstrating SVG output support
+source:
+  images:
+    - "src/logo.svg"
+    - "src/icon.svg"
+  formats: ["svg"]
+
+output:
+  directory: "./dist"
+  formats: ["svg", "png"]
+  structure:
+    favicon: "favicon"
+    social: "social"
+    logos: "logos"
+    platforms: "platforms"
+
+assets:
+  # Safari Pinned Tab Icon
+  - name: safari-pinned-tab
+    type: favicon
+    source: "src/icon.svg"
+    variants:
+      - name: safari-pinned-tab
+        format: svg
+        monochrome: "#000000"
+        simplified: true
+        viewBox: "0 0 100 100"
+
+  # Responsive Website Logos
+  - name: website-logos
+    type: logo
+    source: "src/logo.svg"
+    variants:
+      - name: logo
+        format: svg
+        width: 300
+        viewBox: "0 0 300 91"
+      - name: logo-small
+        format: svg
+        width: 150
+        viewBox: "0 0 150 46"
+
+  # Theme-Based Logo Variants
+  - name: theme-logos
+    type: logo
+    source: "src/logo.svg"
+    variants:
+      - name: logo-light
+        format: svg
+        colorScheme: "light"
+      - name: logo-dark
+        format: svg
+        colorScheme: "dark"
+        colorTransforms:
+          - from: "#000000"
+            to: "#ffffff"
+
+processing:
+  quality:
+    png: 90
+    jpeg: 85
+    webp: 80
+    avif: 75
+    svg: 100
+  optimisation:
+    progressive: true
+    optimise: true
+    lossless: false
+  themes:
+    light:
+      enabled: true
+    dark:
+      enabled: true
+    monochrome:
+      enabled: true
+      color: "#000000"
+      threshold: 128
+  contrast:
+    enabled: false
+    threshold: 128
+    strokeWidth: 1
+    strokeColor: "#000000"

@@ -1,6 +1,7 @@
 import sharp from 'sharp';
 import path from 'path';
 import * as fs from 'fs-extra';
+import { optimize as svgoOptimize, Config as SvgoConfig, PluginConfig } from 'svgo';
 import { 
   SourceImage, 
   AssetVariant, 
@@ -13,7 +14,7 @@ import {
 
 export class ImageProcessor {
   private static readonly SUPPORTED_INPUT_FORMATS = ['svg', 'png', 'jpeg', 'jpg'];
-  private static readonly SUPPORTED_OUTPUT_FORMATS = ['png', 'jpeg', 'webp', 'avif', 'ico'];
+  private static readonly SUPPORTED_OUTPUT_FORMATS = ['png', 'jpeg', 'webp', 'avif', 'ico', 'svg'];
 
   /**
    * Returns the list of supported output formats for validation purposes.
@@ -143,6 +144,8 @@ export class ImageProcessor {
           break;
         case 'ico':
           return await this.generateMultiSizeIcoFile(sourceImage, variant, outputPath, options, config);
+        case 'svg':
+          return await this.processSvgOutput(sourceImage, variant, outputPath);
         default:
           throw new Error(`Unsupported output format: ${variant.format}`);
       }
@@ -229,6 +232,7 @@ export class ImageProcessor {
       case 'jpeg': return 85;
       case 'webp': return 80;
       case 'avif': return 75;
+      case 'svg': return 100;
       default: return 85;
     }
   }
@@ -455,6 +459,116 @@ export class ImageProcessor {
     }
     
     return pipeline;
+  }
+
+  private static async processSvgOutput(
+    sourceImage: SourceImage,
+    variant: AssetVariant,
+    outputPath: string
+  ): Promise<GeneratedAsset> {
+    let svgContent: string;
+    
+    if (sourceImage.format === 'svg') {
+      svgContent = await fs.readFile(sourceImage.path, 'utf-8');
+    } else {
+      throw new Error('SVG output from raster input not yet supported');
+    }
+
+    const svgConfig = {
+      monochrome: variant.monochrome || variant.svg?.monochrome,
+      simplified: variant.simplified || variant.svg?.simplified,
+      viewBox: variant.viewBox || variant.svg?.viewBox,
+      preserveAspectRatio: variant.preserveAspectRatio || variant.svg?.preserveAspectRatio,
+      colorTransforms: variant.colorTransforms || variant.svg?.colorTransforms,
+      ...variant.svg
+    };
+    const svgoPlugins: PluginConfig[] = [];
+
+      if (svgConfig.simplified) {
+        svgoPlugins.push(
+          { name: 'removeAttrs', params: { attrs: ['filter', 'gradient', 'mask', 'clip-path'] } }
+        );
+      }
+
+      if (svgConfig.monochrome) {
+        svgContent = svgContent
+          .replace(/fill="[^"]*"/g, `fill="${svgConfig.monochrome}"`)
+          .replace(/stroke="[^"]*"/g, `stroke="${svgConfig.monochrome}"`)
+          .replace(/fill:[^;"}]*/g, `fill:${svgConfig.monochrome}`)
+          .replace(/stroke:[^;"}]*/g, `stroke:${svgConfig.monochrome}`)
+          .replace(/stop-color="[^"]*"/g, `stop-color="${svgConfig.monochrome}"`)
+          .replace(/stop-color:[^;"}]*/g, `stop-color:${svgConfig.monochrome}`);
+        
+        // Remove gradient and pattern definitions since they can't be monochrome
+        if (svgConfig.simplified) {
+          svgContent = svgContent
+            .replace(/<defs>[\s\S]*?<\/defs>/g, '')
+            .replace(/<linearGradient[\s\S]*?<\/linearGradient>/g, '')
+            .replace(/<radialGradient[\s\S]*?<\/radialGradient>/g, '')
+            .replace(/<pattern[\s\S]*?<\/pattern>/g, '')
+            .replace(/<filter[\s\S]*?<\/filter>/g, '')
+            .replace(/<mask[\s\S]*?<\/mask>/g, '');
+          
+          svgoPlugins.push({
+            name: 'removeAttrs',
+            params: { 
+              attrs: ['clip-path', 'mask', 'filter']
+            }
+          });
+        }
+      }
+
+      if (svgConfig.colorTransforms && svgConfig.colorTransforms.length > 0) {
+        console.warn('Color transforms are not yet supported in SVG processing');
+      }
+
+      const svgoConfig: SvgoConfig = {
+        plugins: [
+          'preset-default',
+          ...svgoPlugins
+        ]
+      };
+
+
+
+      const result = svgoOptimize(svgContent, svgoConfig);
+      let optimisedSvg = result.data;
+
+      if (svgConfig.viewBox) {
+        optimisedSvg = optimisedSvg.replace(
+          /viewBox="[^"]*"/,
+          `viewBox="${svgConfig.viewBox}"`
+        );
+      }
+
+      if (svgConfig.preserveAspectRatio) {
+        if (optimisedSvg.includes('preserveAspectRatio=')) {
+          optimisedSvg = optimisedSvg.replace(
+            /preserveAspectRatio="[^"]*"/,
+            `preserveAspectRatio="${svgConfig.preserveAspectRatio}"`
+          );
+        } else {
+          optimisedSvg = optimisedSvg.replace(
+            /<svg([^>]*)>/,
+            `<svg$1 preserveAspectRatio="${svgConfig.preserveAspectRatio}">`
+          );
+        }
+      }
+
+      await fs.ensureDir(path.dirname(outputPath));
+      await fs.writeFile(outputPath, optimisedSvg, 'utf-8');
+
+      const stats = await fs.stat(outputPath);
+      
+    return {
+      name: variant.name,
+      path: outputPath,
+      format: 'svg',
+      width: variant.width || sourceImage.width,
+      height: variant.height || sourceImage.height,
+      fileSize: stats.size,
+      optimised: true,
+    };
   }
 
   static async generateSingleIcoFile(

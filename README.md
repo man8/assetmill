@@ -4,7 +4,7 @@ A powerful command-line tool for automated image asset processing and optimizati
 
 ## Features
 
-- **Multi-format Support**: Process SVG, PNG, and JPEG source images; output PNG, JPEG, WebP, AVIF, and ICO formats
+- **Multi-format Support**: Process SVG, PNG, and JPEG source images; output PNG, JPEG, WebP, AVIF, ICO, and SVG formats
 - **Comprehensive Asset Generation**: Favicons, social media images, responsive images, and platform-specific assets
 - **Theme Variants**: Automatic generation of light, dark, and monochrome versions
 - **Platform Optimisation**: Built-in presets for Google Workspace, Slack, Discord, GitHub, and more

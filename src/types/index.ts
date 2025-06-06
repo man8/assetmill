@@ -93,7 +93,12 @@ export interface AssetVariant {
   theme?: ThemeVariant;
   background?: string;
   monochrome?: string | MonochromeConfig;
+  simplified?: boolean;
+  viewBox?: string;
+  preserveAspectRatio?: string;
+  colorTransforms?: ColorTransform[];
   sizes?: number[];
+  svg?: SvgConfig;
 }
 
 export interface ProcessingConfig {
@@ -141,6 +146,7 @@ export interface QualityConfig {
   jpeg: number;
   webp: number;
   avif: number;
+  svg: number;
 }
 
 export interface OptimisationConfig {
@@ -181,7 +187,7 @@ export interface MonochromeConfig {
 }
 
 export type InputFormat = 'svg' | 'png' | 'jpeg' | 'jpg';
-export type OutputFormat = 'png' | 'jpeg' | 'webp' | 'avif' | 'ico';
+export type OutputFormat = 'png' | 'jpeg' | 'webp' | 'avif' | 'ico' | 'svg';
 export type ThemeVariant = 'light' | 'dark' | 'monochrome' | 'high-contrast';
 export type AssetType = 'favicon' | 'social' | 'logo' | 'platform-specific';
 export type PlatformType = 'google-workspace' | 'slack' | 'discord' | 'github' | 'twitter' | 'linkedin' | 'facebook';
@@ -205,6 +211,15 @@ export interface ProcessingMetrics {
   failedAssets: number;
   totalFileSize: number;
   processingTime: number;
+}
+
+export interface SvgConfig {
+  monochrome?: string;
+  simplified?: boolean;
+  colorScheme?: 'light' | 'dark';
+  viewBox?: string;
+  preserveAspectRatio?: string;
+  colorTransforms?: ColorTransform[];
 }
 
 export interface CLIOptions {

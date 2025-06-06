@@ -84,12 +84,13 @@ describe('ValidationUtils', () => {
       expect(ValidationUtils.isValidOutputFormat('webp')).toBe(true);
       expect(ValidationUtils.isValidOutputFormat('avif')).toBe(true);
       expect(ValidationUtils.isValidOutputFormat('ico')).toBe(true);
+      expect(ValidationUtils.isValidOutputFormat('svg')).toBe(true);
     });
 
     it('should reject invalid output formats', () => {
-      expect(ValidationUtils.isValidOutputFormat('svg')).toBe(false);
       expect(ValidationUtils.isValidOutputFormat('gif')).toBe(false);
       expect(ValidationUtils.isValidOutputFormat('bmp')).toBe(false);
+      expect(ValidationUtils.isValidOutputFormat('tiff')).toBe(false);
     });
   });
 
@@ -131,7 +132,7 @@ describe('ValidationUtils', () => {
         },
         assets: [],
         processing: {
-          quality: { png: 90, jpeg: 85, webp: 80, avif: 75 },
+          quality: { png: 90, jpeg: 85, webp: 80, avif: 75, svg: 100 },
           optimisation: { progressive: true, optimise: true, lossless: false },
           themes: {
             light: { enabled: true, colorTransforms: [] },
@@ -181,7 +182,7 @@ describe('ValidationUtils', () => {
         },
         assets: [],
         processing: {
-          quality: { png: 90, jpeg: 85, webp: 80, avif: 75 },
+          quality: { png: 90, jpeg: 85, webp: 80, avif: 75, svg: 100 },
           optimisation: { progressive: true, optimise: true, lossless: false },
           themes: {
             light: { enabled: true },
