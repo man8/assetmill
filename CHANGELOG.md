@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2025-06-06
+
+### Changed
+- Version bump to 0.2.1 due to npm immutability policy (no functional changes)
+
+## [0.2.0] - 2025-06-06
+
 ### Added
 - npm publishing configuration for public registry
 - Automated release workflow via GitHub Actions
