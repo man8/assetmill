@@ -474,7 +474,14 @@ export class ImageProcessor {
       throw new Error('SVG output from raster input not yet supported');
     }
 
-    const svgConfig = variant.svg || {};
+    const svgConfig = {
+      monochrome: variant.monochrome || variant.svg?.monochrome,
+      simplified: variant.simplified || variant.svg?.simplified,
+      viewBox: variant.viewBox || variant.svg?.viewBox,
+      preserveAspectRatio: variant.preserveAspectRatio || variant.svg?.preserveAspectRatio,
+      colorTransforms: variant.colorTransforms || variant.svg?.colorTransforms,
+      ...variant.svg
+    };
     const svgoPlugins: PluginConfig[] = [];
 
       if (svgConfig.simplified) {

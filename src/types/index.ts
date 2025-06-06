@@ -93,6 +93,10 @@ export interface AssetVariant {
   theme?: ThemeVariant;
   background?: string;
   monochrome?: string | MonochromeConfig;
+  simplified?: boolean;
+  viewBox?: string;
+  preserveAspectRatio?: string;
+  colorTransforms?: ColorTransform[];
   sizes?: number[];
   svg?: SvgConfig;
 }
