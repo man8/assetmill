@@ -30,7 +30,7 @@ describe('AssetPipeline source assignment', () => {
     },
     assets: [],
     processing: {
-      quality: { png: 90, jpeg: 85, webp: 80, avif: 75 },
+      quality: { png: 90, jpeg: 85, webp: 80, avif: 75, svg: 100 },
       optimisation: { progressive: true, optimise: true, lossless: false },
       themes: {
         light: { enabled: true, colorTransforms: [] },
