@@ -46,13 +46,15 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@types/svgo": "^2.6.4",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
     "fs-extra": "^11.2.0",
     "glob": "^10.3.0",
     "js-yaml": "^4.1.0",
     "ora": "^8.0.1",
-    "sharp": "^0.33.0"
+    "sharp": "^0.33.0",
+    "svgo": "^3.3.2"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",

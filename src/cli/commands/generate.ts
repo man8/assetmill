@@ -17,7 +17,7 @@ export function createGenerateCommand(): Command {
     .option('-v, --verbose', 'Enable verbose logging', false)
     .option('-f, --force', 'Overwrite existing files', false)
     .option('-q, --quality <number>', 'Override quality setting (1-100)', parseInt)
-    .option('--format <formats...>', 'Override output formats (png,jpeg,webp,avif)')
+    .option('--format <formats...>', 'Override output formats (png,jpeg,webp,avif,svg)')
     .action(async (options: CLIOptions) => {
       try {
         if (options.verbose) {
