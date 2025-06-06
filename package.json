@@ -1,6 +1,6 @@
 {
   "name": "assetmill",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A powerful command-line tool for automated image asset processing and optimization. Generate multiple sizes, formats, and variants from source images.",
   "main": "dist/index.js",
   "bin": {
