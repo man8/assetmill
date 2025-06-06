@@ -15,7 +15,7 @@
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",
     "ci": "npm run build && npm test && npm run lint",
-    "prepare": "npm run build",
+    "prepare": "test -d dist || npm run build",
     "prepublishOnly": "npm test && npm run lint"
   },
   "keywords": [
