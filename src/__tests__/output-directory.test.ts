@@ -19,7 +19,7 @@ describe('Output Directory Path Resolution', () => {
   });
 
   describe('ConfigLoader path resolution', () => {
-    it('should resolve relative output directory relative to config file', async () => {
+    it('should resolve relative output directory relative to working directory', async () => {
       const configPath = path.join(configDir, 'relative-config.yml');
       const relativeOutputDir = '../output';
       
@@ -56,7 +56,7 @@ assets:
         const config = await ConfigLoader.load(configPath);
         
         expect(path.isAbsolute(config.output.directory)).toBe(true);
-        expect(config.output.directory).toBe(path.resolve(configDir, relativeOutputDir));
+        expect(config.output.directory).toBe(path.resolve(process.cwd(), relativeOutputDir));
       } finally {
         await fs.remove(configPath);
       }
@@ -230,7 +230,7 @@ assets:
           const pipeline = new AssetPipeline(config, true);
           
           expect(path.isAbsolute(config.output.directory)).toBe(true);
-          expect(config.output.directory).toBe(path.resolve(configDir, relativeOutputDir));
+          expect(config.output.directory).toBe(path.resolve(process.cwd(), relativeOutputDir));
           
           const result = await pipeline.execute();
           expect(result.success).toBe(true);
@@ -242,6 +242,53 @@ assets:
       } finally {
         await fs.remove(configPath);
         await fs.remove(iconPath);
+      }
+    });
+
+    it('should resolve output paths relative to working directory for branding config scenario', async () => {
+      const brandingDir = path.join(testDir, 'branding');
+      const configPath = path.join(brandingDir, 'config.yml');
+      const expectedOutputDir = path.join(process.cwd(), 'storage-app/resources/public');
+      
+      await fs.ensureDir(brandingDir);
+      
+      const testConfig = `
+source:
+  images:
+    - icon.svg
+  formats:
+    - svg
+  validation:
+    minWidth: 512
+    minHeight: 512
+    maxFileSize: 52428800
+    requireTransparency: true
+
+output:
+  directory: storage-app/resources/public
+  formats:
+    - png
+
+assets:
+  - name: test-favicon
+    outputPath: ./
+    variants:
+      - name: favicon-16x16
+        width: 16
+        height: 16
+        format: png
+`;
+
+      await fs.writeFile(configPath, testConfig);
+      
+      try {
+        const config = await ConfigLoader.load(configPath);
+        
+        expect(path.isAbsolute(config.output.directory)).toBe(true);
+        expect(config.output.directory).toBe(expectedOutputDir);
+      } finally {
+        await fs.remove(configPath);
+        await fs.remove(brandingDir);
       }
     });
   });

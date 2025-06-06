@@ -20,7 +20,7 @@ export class ConfigLoader {
       const configDir = path.dirname(path.resolve(configPath));
       
       if (config.output.directory && !path.isAbsolute(config.output.directory)) {
-        config.output.directory = path.resolve(configDir, config.output.directory);
+        config.output.directory = path.resolve(process.cwd(), config.output.directory);
       }
       
       config.source.images = config.source.images.map(imagePath => {
