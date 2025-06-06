@@ -14,15 +14,28 @@ A powerful command-line tool for automated image asset processing and optimizati
 
 ## Installation
 
-Since this package is not yet published to npm, you can install it directly from GitHub:
+### From Private GitHub Releases (Recommended)
 
-### Global Installation
+Since this is a private man8 tool, you'll need a GitHub personal access token with repo access:
+
 ```bash
-npm install -g https://github.com/man8/assetmill.git
+# Set your GitHub token (required for private repo access)
+export GITHUB_TOKEN=your_github_token_here
+
+# Install latest version
+curl -sSL https://raw.githubusercontent.com/man8/assetmill/main/install.sh | bash
+
+# Or install specific version
+curl -sSL https://raw.githubusercontent.com/man8/assetmill/main/install.sh | bash -s -- v0.2.0
 ```
 
-### Using npx (no installation required)
+### Direct from Repository (Development)
+
 ```bash
+# Global installation from repository
+npm install -g https://github.com/man8/assetmill.git
+
+# Using npx (no installation required)
 npx https://github.com/man8/assetmill.git --help
 ```
 

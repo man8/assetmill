@@ -1,0 +1,78 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run CI pipeline
+      run: npm run ci
+      
+    - name: Extract version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      
+    - name: Update package.json version
+      run: |
+        npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version
+        
+    - name: Build distribution
+      run: npm run build
+      
+    - name: Create tarball
+      run: |
+        npm pack
+        mv assetmill-${{ steps.version.outputs.VERSION }}.tgz assetmill-${{ steps.version.outputs.VERSION }}.tar.gz
+        
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        if grep -q "## \[${{ steps.version.outputs.VERSION }}\]" CHANGELOG.md; then
+          sed -n "/## \[${{ steps.version.outputs.VERSION }}\]/,/## \[/p" CHANGELOG.md | sed '$d' > release_notes.md
+        else
+          echo "Release ${{ steps.version.outputs.VERSION }}" > release_notes.md
+          echo "" >> release_notes.md
+          echo "See [CHANGELOG.md](./CHANGELOG.md) for details." >> release_notes.md
+        fi
+        
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ steps.version.outputs.VERSION }}
+        name: Release v${{ steps.version.outputs.VERSION }}
+        body_path: release_notes.md
+        files: |
+          assetmill-${{ steps.version.outputs.VERSION }}.tar.gz
+        draft: false
+        prerelease: false
+        make_latest: true
+        generate_release_notes: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Update version in repository
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add package.json package-lock.json
+        git commit -m "chore: update version to ${{ steps.version.outputs.VERSION }} [skip ci]" || exit 0
+        git push origin HEAD:main || exit 0
