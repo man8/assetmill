@@ -16,18 +16,18 @@ A powerful command-line tool for automated image asset processing and optimizati
 
 ### Global Installation
 ```bash
-npm install -g assetmill
+npm install -g @man8/assetmill
 ```
 
 ### Using npx (no installation required)
 ```bash
-npx assetmill --help
+npx @man8/assetmill --help
 ```
 
 ### Local Development
 ```bash
-npm install assetmill
-npx assetmill --help
+npm install @man8/assetmill
+npx @man8/assetmill --help
 ```
 
 ## Quick Start
