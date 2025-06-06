@@ -29,7 +29,7 @@ export const DEFAULT_CONFIG: PipelineConfig = {
       template: '{name}-{width}x{height}.{format}',
       variables: {},
     },
-    formats: ['png', 'webp', 'jpeg'],
+    formats: ['png', 'webp', 'jpeg', 'svg'],
   },
   assets: [
     {
@@ -74,6 +74,7 @@ export const DEFAULT_CONFIG: PipelineConfig = {
       jpeg: 85,
       webp: 80,
       avif: 75,
+      svg: 100,
     },
     optimisation: {
       progressive: true,

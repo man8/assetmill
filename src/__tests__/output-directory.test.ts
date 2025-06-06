@@ -134,7 +134,7 @@ assets:
         },
         assets: [],
         processing: { 
-          quality: { png: 95, jpeg: 90, webp: 85, avif: 80 },
+          quality: { png: 95, jpeg: 90, webp: 85, avif: 80, svg: 100 },
           optimisation: {
             progressive: true,
             optimise: true,
