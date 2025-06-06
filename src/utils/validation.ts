@@ -149,12 +149,10 @@ export class ValidationUtils {
   }
 
   static isValidImageFormat(format: string): boolean {
-    const { ImageProcessor } = require('../processors/image-processor');
     return ImageProcessor.getSupportedInputFormats().includes(format.toLowerCase());
   }
 
   static isValidOutputFormat(format: string): boolean {
-    const { ImageProcessor } = require('../processors/image-processor');
     return ImageProcessor.getSupportedOutputFormats().includes(format.toLowerCase());
   }
 
@@ -166,7 +164,6 @@ export class ValidationUtils {
    */
   static validateFormatSupport(config: PipelineConfig): string[] {
     const errors: string[] = [];
-    const { ImageProcessor } = require('../processors/image-processor');
     const supportedOutputFormats = ImageProcessor.getSupportedOutputFormats();
 
     config.output.formats.forEach(format => {

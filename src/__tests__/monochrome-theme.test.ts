@@ -1,5 +1,5 @@
 import { ImageProcessor } from '../processors/image-processor';
-import { SourceImage, AssetVariant, PipelineConfig } from '../types';
+import { SourceImage, AssetVariant } from '../types';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import sharp from 'sharp';
