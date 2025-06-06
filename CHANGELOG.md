@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2025-06-06
+
+### Fixed
+- CLI version command now dynamically reads version from package.json instead of hardcoded value
+- Resolves version mismatch where CLI showed 0.0.1 while package was 0.2.0
+
+## [0.2.0] - 2025-06-06
+
 ### Added
 - npm publishing configuration for public registry
 - Automated release workflow via GitHub Actions
