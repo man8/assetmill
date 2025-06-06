@@ -6,6 +6,7 @@ import * as path from 'path';
 describe('ValidationUtils', () => {
   const testDir = path.join(__dirname, 'fixtures');
   const testImagePath = path.join(testDir, 'test-image.png');
+  const svgPath = path.join(testDir, 'small-logo.svg');
 
   beforeAll(async () => {
     await fs.ensureDir(testDir);
@@ -15,6 +16,17 @@ describe('ValidationUtils', () => {
       'base64'
     );
     await fs.writeFile(testImagePath, testImageBuffer);
+    
+    const svgContent = `<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="40" fill="red" />
+      </svg>`;
+    await fs.writeFile(svgPath, svgContent);
+    
+    const testImageExists = await fs.pathExists(testImagePath);
+    const svgExists = await fs.pathExists(svgPath);
+    if (!testImageExists || !svgExists) {
+      throw new Error('Failed to create test fixture files');
+    }
   });
 
   afterAll(async () => {
@@ -89,12 +101,8 @@ describe('ValidationUtils', () => {
 
   describe('SVG validation', () => {
     it('should exempt SVG files from pixel dimension validation', async () => {
-      const svgContent = `<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="40" fill="red" />
-      </svg>`;
-      
-      const svgPath = path.join(testDir, 'small-logo.svg');
-      await fs.writeFile(svgPath, svgContent);
+      const svgExists = await fs.pathExists(svgPath);
+      expect(svgExists).toBe(true);
 
       const config: PipelineConfig = {
         source: {
@@ -199,7 +207,7 @@ describe('ValidationUtils', () => {
     it('should validate asset definitions with valid source assignments', async () => {
       const config: Partial<PipelineConfig> = {
         source: {
-          images: ['icon.svg', 'logo.svg'],
+          images: [svgPath],
           formats: ['svg'],
           validation: {
             minWidth: 512,
@@ -226,7 +234,7 @@ describe('ValidationUtils', () => {
           {
             name: 'favicon-suite',
             type: 'favicon',
-            source: 'icon.svg',
+            source: path.basename(svgPath),
             variants: [
               { name: 'favicon-16x16', width: 16, height: 16, format: 'png' },
             ],
@@ -242,7 +250,7 @@ describe('ValidationUtils', () => {
     it('should reject asset definitions with invalid source assignments', async () => {
       const config: Partial<PipelineConfig> = {
         source: {
-          images: ['icon.svg'],
+          images: [svgPath],
           formats: ['svg'],
           validation: {
             minWidth: 512,

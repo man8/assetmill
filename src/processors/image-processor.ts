@@ -1,7 +1,15 @@
 import sharp from 'sharp';
 import path from 'path';
 import * as fs from 'fs-extra';
-import { SourceImage, AssetVariant, ProcessingOptions, GeneratedAsset, MarginConfig, PipelineConfig, MonochromeConfig } from '../types';
+import { 
+  SourceImage, 
+  AssetVariant, 
+  ProcessingOptions, 
+  GeneratedAsset, 
+  MarginConfig, 
+  PipelineConfig, 
+  MonochromeConfig 
+} from '../types';
 
 export class ImageProcessor {
   private static readonly SUPPORTED_INPUT_FORMATS = ['svg', 'png', 'jpeg', 'jpg'];
@@ -51,7 +59,9 @@ export class ImageProcessor {
    * @param background Background color as hex string or RGB object
    * @returns Sharp RGB object with r, g, b, alpha properties
    */
-  private static parseBackgroundColor(background?: string | object): { r: number; g: number; b: number; alpha: number } {
+  private static parseBackgroundColor(
+    background?: string | object
+  ): { r: number; g: number; b: number; alpha: number } {
     if (!background) {
       return { r: 0, g: 0, b: 0, alpha: 0 }; // Transparent default
     }
@@ -109,7 +119,10 @@ export class ImageProcessor {
       if (variant.theme === 'dark' || options.theme === 'dark') {
         pipeline = pipeline.negate({ alpha: false });
       } else if (variant.theme === 'monochrome' || options.theme === 'monochrome' || variant.monochrome) {
-        const monochromeConfig = this.parseMonochromeConfig(variant.monochrome, config?.processing?.themes?.monochrome);
+        const monochromeConfig = this.parseMonochromeConfig(
+          variant.monochrome, 
+          config?.processing?.themes?.monochrome
+        );
         pipeline = this.applyMonochromeTheme(pipeline, monochromeConfig);
       }
 
@@ -361,7 +374,10 @@ export class ImageProcessor {
       if (variant.theme === 'dark' || options.theme === 'dark') {
         pipeline = pipeline.negate({ alpha: false });
       } else if (variant.theme === 'monochrome' || options.theme === 'monochrome' || variant.monochrome) {
-        const monochromeConfig = this.parseMonochromeConfig(variant.monochrome, config?.processing?.themes?.monochrome);
+        const monochromeConfig = this.parseMonochromeConfig(
+          variant.monochrome, 
+          config?.processing?.themes?.monochrome
+        );
         pipeline = this.applyMonochromeTheme(pipeline, monochromeConfig);
       }
       
@@ -397,7 +413,7 @@ export class ImageProcessor {
    */
   private static parseMonochromeConfig(
     variantMonochrome?: string | MonochromeConfig,
-    globalMonochrome?: any
+    globalMonochrome?: MonochromeConfig
   ): MonochromeConfig {
     if (typeof variantMonochrome === 'string') {
       return { color: variantMonochrome, threshold: 128 };
