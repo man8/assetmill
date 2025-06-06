@@ -14,20 +14,19 @@ A powerful command-line tool for automated image asset processing and optimizati
 
 ## Installation
 
-Since this package is not yet published to npm, you can install it directly from GitHub:
-
 ### Global Installation
 ```bash
-npm install -g https://github.com/man8/assetmill.git
+npm install -g assetmill
 ```
 
 ### Using npx (no installation required)
 ```bash
-npx https://github.com/man8/assetmill.git --help
+npx assetmill --help
 ```
 
 ### Local Development
 ```bash
+npm install assetmill
 npx assetmill --help
 ```
 
