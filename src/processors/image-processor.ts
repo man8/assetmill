@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 import path from 'path';
 import * as fs from 'fs-extra';
-import { optimize as svgoOptimize, Config as SvgoConfig } from 'svgo';
+import { optimize as svgoOptimize, Config as SvgoConfig, PluginConfig } from 'svgo';
 import { 
   SourceImage, 
   AssetVariant, 
@@ -475,7 +475,7 @@ export class ImageProcessor {
     }
 
     const svgConfig = variant.svg || {};
-    const svgoPlugins: any[] = [];
+    const svgoPlugins: PluginConfig[] = [];
 
       if (svgConfig.simplified) {
         svgoPlugins.push(
@@ -511,14 +511,7 @@ export class ImageProcessor {
       }
 
       if (svgConfig.colorTransforms && svgConfig.colorTransforms.length > 0) {
-        for (const transform of svgConfig.colorTransforms) {
-          svgoPlugins.push({
-            name: 'convertColors',
-            params: { 
-              names2hex: { [transform.from]: transform.to }
-            }
-          });
-        }
+        console.warn('Color transforms are not yet supported in SVG processing');
       }
 
       const svgoConfig: SvgoConfig = {
