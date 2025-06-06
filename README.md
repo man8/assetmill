@@ -14,14 +14,9 @@ A powerful command-line tool for automated image asset processing and optimizati
 
 ## Installation
 
-### From Private GitHub Releases (Recommended)
-
-Since this is a private man8 tool, you'll need a GitHub personal access token with repo access:
+### From GitHub Releases (Recommended)
 
 ```bash
-# Set your GitHub token (required for private repo access)
-export GITHUB_TOKEN=your_github_token_here
-
 # Install latest version
 curl -sSL https://raw.githubusercontent.com/man8/assetmill/main/install.sh | bash
 
