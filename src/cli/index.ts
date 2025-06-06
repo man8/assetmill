@@ -5,13 +5,18 @@ import { createGenerateCommand } from './commands/generate';
 import { createInitCommand } from './commands/init';
 import { createValidateCommand } from './commands/validate';
 import { Logger } from '../utils/logger';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 const program = new Command();
+
+const packageJsonPath = join(__dirname, '../../package.json');
+const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
 
 program
   .name('assetmill')
   .description('A powerful command-line tool for automated image asset processing and optimization')
-  .version('0.2.1');
+  .version(packageJson.version);
 
 program.addCommand(createInitCommand());
 program.addCommand(createGenerateCommand());

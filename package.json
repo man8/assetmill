@@ -1,6 +1,6 @@
 {
   "name": "@man8/assetmill",
-  "version": "0.2.1",
+  "version": "0.2.0",
   "description": "A powerful command-line tool for automated image asset processing and optimization. Generate multiple sizes, formats, and variants from source images.",
   "main": "dist/index.js",
   "bin": {

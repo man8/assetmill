@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.1] - 2025-06-06
 
 ### Fixed
-- CLI version command now correctly displays package version (0.2.1) instead of hardcoded 0.0.1
+- CLI version command now dynamically reads version from package.json instead of hardcoded value
+- Resolves version mismatch where CLI showed 0.0.1 while package was 0.2.0
 
 ## [0.2.0] - 2025-06-06
 
