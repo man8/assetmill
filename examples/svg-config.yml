@@ -22,10 +22,9 @@ assets:
     variants:
       - name: safari-pinned-tab
         format: svg
-        svg:
-          monochrome: "#000000"
-          simplified: true
-          viewBox: "0 0 100 100"
+        monochrome: "#000000"
+        simplified: true
+        viewBox: "0 0 100 100"
 
   # Responsive Website Logos
   - name: website-logos
@@ -35,13 +34,11 @@ assets:
       - name: logo
         format: svg
         width: 300
-        svg:
-          viewBox: "0 0 300 91"
+        viewBox: "0 0 300 91"
       - name: logo-small
         format: svg
         width: 150
-        svg:
-          viewBox: "0 0 150 46"
+        viewBox: "0 0 150 46"
 
   # Theme-Based Logo Variants
   - name: theme-logos
@@ -50,15 +47,13 @@ assets:
     variants:
       - name: logo-light
         format: svg
-        svg:
-          colorScheme: "light"
+        colorScheme: "light"
       - name: logo-dark
         format: svg
-        svg:
-          colorScheme: "dark"
-          colorTransforms:
-            - from: "#000000"
-              to: "#ffffff"
+        colorScheme: "dark"
+        colorTransforms:
+          - from: "#000000"
+            to: "#ffffff"
 
 processing:
   quality:

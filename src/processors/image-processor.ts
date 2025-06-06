@@ -474,7 +474,14 @@ export class ImageProcessor {
       throw new Error('SVG output from raster input not yet supported');
     }
 
-    const svgConfig = variant.svg || {};
+    const svgConfig = {
+      monochrome: variant.monochrome || variant.svg?.monochrome,
+      simplified: variant.simplified || variant.svg?.simplified,
+      viewBox: variant.viewBox || variant.svg?.viewBox,
+      preserveAspectRatio: variant.preserveAspectRatio || variant.svg?.preserveAspectRatio,
+      colorTransforms: variant.colorTransforms || variant.svg?.colorTransforms,
+      ...variant.svg
+    };
     const svgoPlugins: PluginConfig[] = [];
 
       if (svgConfig.simplified) {
@@ -484,30 +491,31 @@ export class ImageProcessor {
       }
 
       if (svgConfig.monochrome) {
-        svgoPlugins.push({
-          name: 'convertColors',
-          params: { 
-            names2hex: true,
-            rgb2hex: true,
-            shorthex: true
-          }
-        });
+        svgContent = svgContent
+          .replace(/fill="[^"]*"/g, `fill="${svgConfig.monochrome}"`)
+          .replace(/stroke="[^"]*"/g, `stroke="${svgConfig.monochrome}"`)
+          .replace(/fill:[^;"}]*/g, `fill:${svgConfig.monochrome}`)
+          .replace(/stroke:[^;"}]*/g, `stroke:${svgConfig.monochrome}`)
+          .replace(/stop-color="[^"]*"/g, `stop-color="${svgConfig.monochrome}"`)
+          .replace(/stop-color:[^;"}]*/g, `stop-color:${svgConfig.monochrome}`);
         
-        svgoPlugins.push({
-          name: 'removeAttrs',
-          params: { 
-            attrs: ['fill', 'stroke'],
-            elemSeparator: '>',
-            preserveCurrentColor: false
-          }
-        });
-        
-        svgoPlugins.push({
-          name: 'addAttributesToSVGElement',
-          params: {
-            attributes: [{ fill: svgConfig.monochrome }]
-          }
-        });
+        // Remove gradient and pattern definitions since they can't be monochrome
+        if (svgConfig.simplified) {
+          svgContent = svgContent
+            .replace(/<defs>[\s\S]*?<\/defs>/g, '')
+            .replace(/<linearGradient[\s\S]*?<\/linearGradient>/g, '')
+            .replace(/<radialGradient[\s\S]*?<\/radialGradient>/g, '')
+            .replace(/<pattern[\s\S]*?<\/pattern>/g, '')
+            .replace(/<filter[\s\S]*?<\/filter>/g, '')
+            .replace(/<mask[\s\S]*?<\/mask>/g, '');
+          
+          svgoPlugins.push({
+            name: 'removeAttrs',
+            params: { 
+              attrs: ['clip-path', 'mask', 'filter']
+            }
+          });
+        }
       }
 
       if (svgConfig.colorTransforms && svgConfig.colorTransforms.length > 0) {
