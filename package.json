@@ -42,6 +42,10 @@
     "url": "https://github.com/man8/assetmill/issues"
   },
   "homepage": "https://github.com/man8/assetmill#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
