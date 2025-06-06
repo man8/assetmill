@@ -11,7 +11,7 @@ const program = new Command();
 program
   .name('assetmill')
   .description('A powerful command-line tool for automated image asset processing and optimization')
-  .version('0.0.1');
+  .version('0.2.1');
 
 program.addCommand(createInitCommand());
 program.addCommand(createGenerateCommand());
