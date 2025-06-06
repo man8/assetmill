@@ -1,0 +1,50 @@
+source:
+  images: ['logo.svg']
+  formats: ['svg', 'png']
+  validation:
+    minWidth: 512
+    minHeight: 512
+    maxFileSize: 50MB
+    requireTransparency: true
+
+output:
+  directory: './assets'
+  structure:
+    favicon: 'public/favicon'
+    social: 'assets/social'
+    logos: 'images/logos'
+    platforms: 'assets/platforms'
+  naming:
+    template: '{name}-{width}x{height}.{format}'
+  formats: ['png', 'svg']
+
+assets:
+  - name: test-asset
+    type: logo
+    outputPath: 'images/logos/'
+    variants:
+      - name: logo-svg
+        width: 100
+        height: 100
+        format: svg
+      - name: logo-ico
+        width: 32
+        height: 32
+        format: ico
+
+processing:
+  quality:
+    png: 90
+    jpeg: 85
+    webp: 80
+    avif: 75
+  optimisation:
+    progressive: true
+    optimise: true
+  themes:
+    light:
+      enabled: true
+    dark:
+      enabled: false
+    monochrome:
+      enabled: false
