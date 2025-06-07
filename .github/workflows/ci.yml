@@ -8,30 +8,59 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-    
     strategy:
       matrix:
+        # Platform coverage:
+        # ubuntu-latest: Linux x64 (most CI/CD and Linux users)
+        # windows-latest: Windows x64 (Windows users)
+        # macos-latest: macOS Intel (Intel Mac users)
+        # macos-14: macOS ARM64 (M1/M2 Mac users)
+        os: [ubuntu-latest, windows-latest, macos-latest, macos-14]
         node-version: [18, 20, 22]
-    
+        exclude:
+          # Skip some combinations to reduce CI time while maintaining coverage
+          - os: windows-latest
+            node-version: 20
+          - os: macos-latest
+            node-version: 20
+          - os: macos-14
+            node-version: 20
+
+    runs-on: ${{ matrix.os }}
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
+
+    - name: Show platform info
+      run: |
+        echo "OS: ${{ matrix.os }}"
+        echo "Node: ${{ matrix.node-version }}"
+        echo "Platform: ${{ runner.os }}"
+        echo "Architecture: ${{ runner.arch }}"
+        node --version
+        npm --version
+
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    
+
     - name: Install dependencies
       run: npm ci
-    
+
     - name: Run CI pipeline
       run: npm run ci
-    
+
+    - name: Test CLI tool
+      run: |
+        npm run build
+        node dist/cli/index.js --help
+        echo "CLI test completed successfully"
+
     - name: Security audit
       run: npm audit --audit-level moderate
-    
+
     - name: Check for outdated dependencies
       run: npm outdated || true
