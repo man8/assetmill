@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **File Overwrite Control**: New configuration option to control file overwriting behaviour with three modes:
+  - `allow`: Silently overwrite existing files
+  - `warn`: Log a warning but proceed with overwriting
+  - `error`: Fail processing when an output file already exists (new default)
+- Global overwrite setting in `output.overwrite` configuration
+- Per-variant overwrite setting in `AssetVariant.overwrite` configuration
+- CLI `--force` flag now overrides any overwrite configuration settings
+
 ### Changed
+- **BREAKING CHANGE**: Default behaviour now prevents file overwriting unless explicitly configured
 - Improved release workflow with better automation and validation
 
 ### Fixed
@@ -32,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-06-06
 
 ### Added
-- Initial release of AssetMill brand asset pipeline CLI tool
+- Initial release of assetmill brand asset pipeline CLI tool
 - Comprehensive image asset generation for web applications
 - Support for favicon generation (multiple sizes and formats)
 - Social media asset generation (Open Graph, Twitter, LinkedIn, Facebook)

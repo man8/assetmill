@@ -130,6 +130,7 @@ describe('ValidationUtils', () => {
             variables: {},
           },
           formats: ['png'],
+          overwrite: 'error',
         },
         assets: [],
         processing: {
@@ -180,6 +181,7 @@ describe('ValidationUtils', () => {
             variables: {},
           },
           formats: ['png'],
+          overwrite: 'error',
         },
         assets: [],
         processing: {
@@ -231,6 +233,7 @@ describe('ValidationUtils', () => {
             variables: {},
           },
           formats: ['png'],
+          overwrite: 'error',
         },
         assets: [
           {
@@ -274,6 +277,7 @@ describe('ValidationUtils', () => {
             variables: {},
           },
           formats: ['png'],
+          overwrite: 'error',
         },
         assets: [
           {
@@ -309,7 +313,8 @@ describe('ValidationUtils', () => {
             template: '{name}',
             variables: {}
           },
-          formats: ['png']
+          formats: ['png'],
+          overwrite: 'error'
         },
         assets: [
           {
@@ -347,7 +352,8 @@ describe('ValidationUtils', () => {
             template: '{name}',
             variables: {}
           },
-          formats: ['png']
+          formats: ['png'],
+          overwrite: 'error'
         },
         assets: [
           {
@@ -383,7 +389,8 @@ describe('ValidationUtils', () => {
             template: '{name}',
             variables: {}
           },
-          formats: ['png']
+          formats: ['png'],
+          overwrite: 'error'
         },
         assets: [
           {

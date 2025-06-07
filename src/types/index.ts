@@ -34,6 +34,7 @@ export interface ProcessingOptions {
   background?: string;
   margin?: MarginConfig;
   theme?: ThemeVariant;
+  overwriteMode?: OverwriteMode;
 }
 
 export interface GeneratedAsset {
@@ -73,6 +74,7 @@ export interface OutputConfig {
   structure: DirectoryStructure;
   naming: NamingConfig;
   formats: OutputFormat[];
+  overwrite: OverwriteMode;
 }
 
 export interface AssetDefinition {
@@ -99,6 +101,7 @@ export interface AssetVariant {
   colorTransforms?: ColorTransform[];
   sizes?: number[];
   svg?: SvgConfig;
+  overwrite?: OverwriteMode;
 }
 
 export interface ProcessingConfig {
@@ -191,6 +194,7 @@ export type OutputFormat = 'png' | 'jpeg' | 'webp' | 'avif' | 'ico' | 'svg';
 export type ThemeVariant = 'light' | 'dark' | 'monochrome' | 'high-contrast';
 export type AssetType = 'favicon' | 'social' | 'logo' | 'platform-specific';
 export type PlatformType = 'google-workspace' | 'slack' | 'discord' | 'github' | 'twitter' | 'linkedin' | 'facebook';
+export type OverwriteMode = 'allow' | 'warn' | 'error';
 
 export interface ProcessingResult {
   success: boolean;

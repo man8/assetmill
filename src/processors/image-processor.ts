@@ -9,8 +9,10 @@ import {
   GeneratedAsset, 
   MarginConfig, 
   PipelineConfig, 
-  MonochromeConfig 
+  MonochromeConfig,
+  OverwriteMode 
 } from '../types';
+import { FileUtils } from '../utils/file-utils';
 
 export class ImageProcessor {
   private static readonly SUPPORTED_INPUT_FORMATS = ['svg', 'png', 'jpeg', 'jpg'];
@@ -162,6 +164,9 @@ export class ImageProcessor {
     }
 
     await fs.ensureDir(path.dirname(outputPath));
+    if (options.overwriteMode) {
+      await FileUtils.checkOverwritePermission(outputPath, options.overwriteMode);
+    }
     await pipeline.toFile(outputPath);
 
     const stats = await fs.stat(outputPath);
@@ -190,7 +195,7 @@ export class ImageProcessor {
         return await this.generateMultiSizeIcoFile(sourceImage, variant, outputPath, options, config);
       }
       if (variant.format === 'svg') {
-        return await this.processSvgOutput(sourceImage, variant, outputPath);
+        return await this.processSvgOutput(sourceImage, variant, outputPath, options);
       }
 
       let pipeline = this.setupBasePipeline(sourceImage);
@@ -314,7 +319,11 @@ export class ImageProcessor {
     }
   }
 
-  static async generateFavicon(sourceImage: SourceImage, outputPath: string): Promise<GeneratedAsset[]> {
+  static async generateFavicon(
+    sourceImage: SourceImage, 
+    outputPath: string, 
+    overwriteMode?: OverwriteMode
+  ): Promise<GeneratedAsset[]> {
     const sizes = [16, 32, 48];
     const assets: GeneratedAsset[] = [];
 
@@ -329,6 +338,9 @@ export class ImageProcessor {
 
     await fs.ensureDir(path.dirname(outputPath));
     
+    if (overwriteMode) {
+      await FileUtils.checkOverwritePermission(outputPath, overwriteMode);
+    }
     const icoBuffer = await this.createIcoFile(buffers, sizes);
     await fs.writeFile(outputPath, icoBuffer);
 
@@ -553,7 +565,8 @@ export class ImageProcessor {
   private static async processSvgOutput(
     sourceImage: SourceImage,
     variant: AssetVariant,
-    outputPath: string
+    outputPath: string,
+    options: ProcessingOptions = {}
   ): Promise<GeneratedAsset> {
     let svgContent: string;
     
@@ -601,6 +614,9 @@ export class ImageProcessor {
     optimisedSvg = this.applySvgAttributes(optimisedSvg, svgConfig);
 
     await fs.ensureDir(path.dirname(outputPath));
+    if (options.overwriteMode) {
+      await FileUtils.checkOverwritePermission(outputPath, options.overwriteMode);
+    }
     await fs.writeFile(outputPath, optimisedSvg, 'utf-8');
 
     const stats = await fs.stat(outputPath);
@@ -619,7 +635,8 @@ export class ImageProcessor {
   static async generateSingleIcoFile(
     sourceImage: SourceImage, 
     variant: AssetVariant, 
-    outputPath: string
+    outputPath: string,
+    overwriteMode?: OverwriteMode
   ): Promise<GeneratedAsset> {
     const size = variant.width || variant.height || 32;
     const background = this.parseBackgroundColor(variant.background);
@@ -635,6 +652,9 @@ export class ImageProcessor {
 
     await fs.ensureDir(path.dirname(outputPath));
     
+    if (overwriteMode) {
+      await FileUtils.checkOverwritePermission(outputPath, overwriteMode);
+    }
     const icoBuffer = await this.createIcoFile([buffer], [size]);
     await fs.writeFile(outputPath, icoBuffer);
 

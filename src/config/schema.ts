@@ -1,4 +1,4 @@
-import { PipelineConfig, AssetType, OutputFormat } from '../types';
+import { PipelineConfig, AssetType, OutputFormat, OverwriteMode } from '../types';
 
 export const DEFAULT_CONFIG: PipelineConfig = {
   source: {
@@ -30,6 +30,7 @@ export const DEFAULT_CONFIG: PipelineConfig = {
       variables: {},
     },
     formats: ['png', 'webp', 'jpeg', 'svg'],
+    overwrite: 'error' as OverwriteMode,
   },
   assets: [
     {

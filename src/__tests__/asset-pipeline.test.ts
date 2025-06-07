@@ -27,6 +27,7 @@ describe('AssetPipeline source assignment', () => {
         variables: {},
       },
       formats: ['png'],
+      overwrite: 'error',
     },
     assets: [],
     processing: {

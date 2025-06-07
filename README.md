@@ -105,6 +105,7 @@ source:
 
 output:
   directory: ./assets
+  overwrite: error  # Control file overwriting: 'allow', 'warn', or 'error'
   structure:
     favicon: public/favicon
     social: assets/social
@@ -288,6 +289,54 @@ margin:
   right: "5%"          # 5% right margin
   bottom: 30           # 30 pixels bottom margin
   left: "8%"           # 8% left margin
+```
+
+### File Overwrite Control
+
+Control how assetmill handles existing output files:
+
+```yaml
+# Global overwrite setting
+output:
+  overwrite: error  # Default: fail when files exist
+
+# Per-variant overwrite examples
+assets:
+  - name: production-assets
+    variants:
+      - name: favicon-32
+        width: 32
+        height: 32
+        format: png
+        overwrite: error  # Fail if file exists (safest)
+      
+      - name: temp-preview
+        width: 64
+        height: 64
+        format: png
+        overwrite: warn   # Warn but proceed with overwriting
+      
+      - name: cache-file
+        width: 128
+        height: 128
+        format: png
+        overwrite: allow  # Silently overwrite existing files
+```
+
+**Overwrite Modes:**
+- `error`: Fail processing when an output file already exists (default, safest)
+- `warn`: Log a warning but proceed with overwriting (useful for development)
+- `allow`: Silently overwrite existing files (fastest)
+
+**CLI Override:**
+```bash
+# Force overwrite regardless of configuration
+assetmill generate --force
+
+# Examples with different scenarios
+assetmill generate                    # Respects config (default: error)
+assetmill generate --force            # Always overwrites
+assetmill generate --config dev.yml   # Uses dev config (might be 'allow')
 ```
 
 ### Theme Variants

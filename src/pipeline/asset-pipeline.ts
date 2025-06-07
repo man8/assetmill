@@ -9,7 +9,8 @@ import {
   MarginConfig, 
   ThemeVariant,
   AssetDefinition,
-  OutputFormat 
+  OutputFormat,
+  OverwriteMode 
 } from '../types';
 import { FaviconGenerator } from '../generators/favicon-generator';
 import { SocialGenerator } from '../generators/social-generator';
@@ -22,10 +23,12 @@ import { Logger } from '../utils/logger';
 export class AssetPipeline {
   private config: PipelineConfig;
   private dryRun: boolean;
+  private overwriteMode: OverwriteMode;
 
-  constructor(config: PipelineConfig, dryRun: boolean = false) {
+  constructor(config: PipelineConfig, dryRun: boolean = false, overwriteMode?: OverwriteMode) {
     this.config = config;
     this.dryRun = dryRun;
+    this.overwriteMode = overwriteMode || config.output.overwrite;
   }
 
   async execute(): Promise<ProcessingResult> {
@@ -178,6 +181,7 @@ export class AssetPipeline {
           background: variantObj.background as string | undefined,
           margin: variantObj.margin as MarginConfig | undefined,
           theme: variantObj.theme as ThemeVariant | undefined,
+          overwriteMode: (variantObj as Record<string, unknown>).overwrite as OverwriteMode || this.overwriteMode,
         },
         this.config);
 
