@@ -6,7 +6,7 @@
   "bin": {
     "assetmill": "dist/cli/index.js"
   },
-    "scripts": {
+  "scripts": {
     "clean": "npx rimraf dist",
     "clean:all": "npx rimraf dist node_modules",
     "build": "tsc",
@@ -63,7 +63,7 @@
     "glob": "^10.3.0",
     "js-yaml": "^4.1.0",
     "ora": "^8.0.1",
-    "sharp": "^0.33.0",
+    "sharp": "^0.34.2",
     "svgo": "^3.3.2"
   },
   "devDependencies": {
