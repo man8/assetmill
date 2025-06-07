@@ -1,7 +1,9 @@
 {
+  // Prettier configuration aligned with man8 coding standards
   "semi": true,
   "trailingComma": "es5",
   "singleQuote": true,
+  // 119 character line length follows man8 repository standards
   "printWidth": 119,
   "tabWidth": 2
 }
