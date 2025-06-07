@@ -541,8 +541,8 @@ export class ImageProcessor {
         );
       } else {
         optimisedSvg = optimisedSvg.replace(
-          /<svg([^>]*)>/,
-          `<svg$1 preserveAspectRatio="${svgConfig.preserveAspectRatio}">`
+          /<svg\s+([^>]*?)>/,
+          `<svg $1 preserveAspectRatio="${svgConfig.preserveAspectRatio}">`
         );
       }
     }

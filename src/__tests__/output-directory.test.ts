@@ -154,7 +154,7 @@ assets:
         }
       };
 
-      expect(path.join(mockConfig.output.directory, './subfolder')).toBe('/test/output/subfolder');
+      expect(path.posix.join(mockConfig.output.directory, './subfolder')).toBe('/test/output/subfolder');
       expect('/absolute/path').toBe('/absolute/path');
     });
   });
