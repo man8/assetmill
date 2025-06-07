@@ -74,6 +74,110 @@ export class ImageProcessor {
     return background as { r: number; g: number; b: number; alpha: number };
   }
 
+  private static setupBasePipeline(
+    sourceImage: SourceImage
+  ): sharp.Sharp {
+    let pipeline = sharp(sourceImage.path);
+    
+    if (sourceImage.format === 'svg') {
+      pipeline = sharp(sourceImage.path, { density: 300 });
+    }
+    
+    return pipeline;
+  }
+
+  private static applyResizeAndBackground(
+    pipeline: sharp.Sharp,
+    variant: AssetVariant,
+    options: ProcessingOptions = {}
+  ): sharp.Sharp {
+    if (variant.width || variant.height) {
+      const backgroundColor = this.parseBackgroundColor(variant.background || options.background);
+      const resizeOptions: sharp.ResizeOptions = {
+        fit: 'contain',
+        background: backgroundColor,
+      };
+
+      if (variant.width && variant.height) {
+        resizeOptions.width = variant.width;
+        resizeOptions.height = variant.height;
+      } else if (variant.width) {
+        resizeOptions.width = variant.width;
+      } else if (variant.height) {
+        resizeOptions.height = variant.height;
+      }
+
+      pipeline = pipeline.resize(resizeOptions);
+      
+      if (variant.background || options.background) {
+        pipeline = pipeline.flatten({ background: backgroundColor });
+      }
+    }
+
+    return pipeline;
+  }
+
+  private static applyThemes(
+    pipeline: sharp.Sharp,
+    variant: AssetVariant,
+    options: ProcessingOptions = {},
+    config?: PipelineConfig
+  ): sharp.Sharp {
+    if (variant.theme === 'dark' || options.theme === 'dark') {
+      pipeline = pipeline.negate({ alpha: false });
+    } else if (variant.theme === 'monochrome' || options.theme === 'monochrome' || variant.monochrome) {
+      const monochromeConfig = this.parseMonochromeConfig(
+        variant.monochrome, 
+        config?.processing?.themes?.monochrome
+      );
+      pipeline = this.applyMonochromeTheme(pipeline, monochromeConfig);
+    }
+
+    return pipeline;
+  }
+
+  private static async applyFormatAndSave(
+    pipeline: sharp.Sharp,
+    variant: AssetVariant,
+    outputPath: string,
+    options: ProcessingOptions = {}
+  ): Promise<GeneratedAsset> {
+    const quality = variant.quality || options.quality || this.getDefaultQuality(variant.format);
+
+    switch (variant.format) {
+      case 'png':
+        pipeline = pipeline.png({ quality, progressive: true, compressionLevel: 9 });
+        break;
+      case 'jpeg':
+        pipeline = pipeline.jpeg({ quality, progressive: true, mozjpeg: true });
+        break;
+      case 'webp':
+        pipeline = pipeline.webp({ quality, lossless: false });
+        break;
+      case 'avif':
+        pipeline = pipeline.avif({ quality, lossless: false });
+        break;
+      default:
+        throw new Error(`Unsupported output format: ${variant.format}`);
+    }
+
+    await fs.ensureDir(path.dirname(outputPath));
+    await pipeline.toFile(outputPath);
+
+    const stats = await fs.stat(outputPath);
+    const finalMetadata = await sharp(outputPath).metadata();
+
+    return {
+      name: variant.name,
+      path: outputPath,
+      format: variant.format,
+      width: finalMetadata.width || 0,
+      height: finalMetadata.height || 0,
+      fileSize: stats.size,
+      optimised: true,
+    };
+  }
+
   static async processImage(
     sourceImage: SourceImage,
     variant: AssetVariant,
@@ -82,89 +186,25 @@ export class ImageProcessor {
     config?: PipelineConfig
   ): Promise<GeneratedAsset> {
     try {
-      let pipeline = sharp(sourceImage.path);
-
-      if (sourceImage.format === 'svg') {
-        pipeline = sharp(sourceImage.path, { density: 300 });
+      if (variant.format === 'ico') {
+        return await this.generateMultiSizeIcoFile(sourceImage, variant, outputPath, options, config);
+      }
+      if (variant.format === 'svg') {
+        return await this.processSvgOutput(sourceImage, variant, outputPath);
       }
 
+      let pipeline = this.setupBasePipeline(sourceImage);
       await pipeline.metadata();
 
-      if (variant.width || variant.height) {
-        const backgroundColor = this.parseBackgroundColor(variant.background || options.background);
-        const resizeOptions: sharp.ResizeOptions = {
-          fit: 'contain',
-          background: backgroundColor,
-        };
-
-        if (variant.width && variant.height) {
-          resizeOptions.width = variant.width;
-          resizeOptions.height = variant.height;
-        } else if (variant.width) {
-          resizeOptions.width = variant.width;
-        } else if (variant.height) {
-          resizeOptions.height = variant.height;
-        }
-
-        pipeline = pipeline.resize(resizeOptions);
-        
-        if (variant.background || options.background) {
-          pipeline = pipeline.flatten({ background: backgroundColor });
-        }
-      }
+      pipeline = this.applyResizeAndBackground(pipeline, variant, options);
 
       if (variant.margin || options.margin) {
         pipeline = await this.applyMargin(pipeline, variant.margin || options.margin!, variant.width, variant.height);
       }
 
-      if (variant.theme === 'dark' || options.theme === 'dark') {
-        pipeline = pipeline.negate({ alpha: false });
-      } else if (variant.theme === 'monochrome' || options.theme === 'monochrome' || variant.monochrome) {
-        const monochromeConfig = this.parseMonochromeConfig(
-          variant.monochrome, 
-          config?.processing?.themes?.monochrome
-        );
-        pipeline = this.applyMonochromeTheme(pipeline, monochromeConfig);
-      }
+      pipeline = this.applyThemes(pipeline, variant, options, config);
 
-      const quality = variant.quality || options.quality || this.getDefaultQuality(variant.format);
-
-      switch (variant.format) {
-        case 'png':
-          pipeline = pipeline.png({ quality, progressive: true, compressionLevel: 9 });
-          break;
-        case 'jpeg':
-          pipeline = pipeline.jpeg({ quality, progressive: true, mozjpeg: true });
-          break;
-        case 'webp':
-          pipeline = pipeline.webp({ quality, lossless: false });
-          break;
-        case 'avif':
-          pipeline = pipeline.avif({ quality, lossless: false });
-          break;
-        case 'ico':
-          return await this.generateMultiSizeIcoFile(sourceImage, variant, outputPath, options, config);
-        case 'svg':
-          return await this.processSvgOutput(sourceImage, variant, outputPath);
-        default:
-          throw new Error(`Unsupported output format: ${variant.format}`);
-      }
-
-      await fs.ensureDir(path.dirname(outputPath));
-      await pipeline.toFile(outputPath);
-
-      const stats = await fs.stat(outputPath);
-      const finalMetadata = await sharp(outputPath).metadata();
-
-      return {
-        name: variant.name,
-        path: outputPath,
-        format: variant.format,
-        width: finalMetadata.width || 0,
-        height: finalMetadata.height || 0,
-        fileSize: stats.size,
-        optimised: true,
-      };
+      return await this.applyFormatAndSave(pipeline, variant, outputPath, options);
     } catch (error) {
       throw new Error(`Failed to process image ${sourceImage.path} for variant ${variant.name}: ${error}`);
     }
@@ -363,27 +403,16 @@ export class ImageProcessor {
     
     const buffers: Buffer[] = [];
     for (const size of sizes) {
-      const background = this.parseBackgroundColor(variant.background || options.background);
-      let pipeline = sharp(sourceImage.path)
-        .resize(size, size, { fit: 'contain', background });
+      let pipeline = this.setupBasePipeline(sourceImage);
       
-      if (variant.background || options.background) {
-        pipeline = pipeline.flatten({ background });
-      }
+      const sizeVariant = { ...variant, width: size, height: size };
+      pipeline = this.applyResizeAndBackground(pipeline, sizeVariant, options);
 
       if (variant.margin || options.margin) {
         pipeline = await this.applyMargin(pipeline, variant.margin || options.margin!);
       }
 
-      if (variant.theme === 'dark' || options.theme === 'dark') {
-        pipeline = pipeline.negate({ alpha: false });
-      } else if (variant.theme === 'monochrome' || options.theme === 'monochrome' || variant.monochrome) {
-        const monochromeConfig = this.parseMonochromeConfig(
-          variant.monochrome, 
-          config?.processing?.themes?.monochrome
-        );
-        pipeline = this.applyMonochromeTheme(pipeline, monochromeConfig);
-      }
+      pipeline = this.applyThemes(pipeline, variant, options, config);
       
       const buffer = await pipeline.png().toBuffer();
       buffers.push(buffer);
@@ -461,6 +490,66 @@ export class ImageProcessor {
     return pipeline;
   }
 
+  private static parseSvgConfig(variant: AssetVariant): Record<string, unknown> {
+    return {
+      monochrome: variant.monochrome || variant.svg?.monochrome,
+      simplified: variant.simplified || variant.svg?.simplified,
+      viewBox: variant.viewBox || variant.svg?.viewBox,
+      preserveAspectRatio: variant.preserveAspectRatio || variant.svg?.preserveAspectRatio,
+      colorTransforms: variant.colorTransforms || variant.svg?.colorTransforms,
+      ...variant.svg
+    };
+  }
+
+  private static transformSvgContent(svgContent: string, svgConfig: Record<string, unknown>): string {
+    if (svgConfig.monochrome) {
+      svgContent = svgContent
+        .replace(/fill="[^"]*"/g, `fill="${svgConfig.monochrome}"`)
+        .replace(/stroke="[^"]*"/g, `stroke="${svgConfig.monochrome}"`)
+        .replace(/fill:[^;"}]*/g, `fill:${svgConfig.monochrome}`)
+        .replace(/stroke:[^;"}]*/g, `stroke:${svgConfig.monochrome}`)
+        .replace(/stop-color="[^"]*"/g, `stop-color="${svgConfig.monochrome}"`)
+        .replace(/stop-color:[^;"}]*/g, `stop-color:${svgConfig.monochrome}`);
+      
+      if (svgConfig.simplified) {
+        svgContent = svgContent
+          .replace(/<defs>[\s\S]*?<\/defs>/g, '')
+          .replace(/<linearGradient[\s\S]*?<\/linearGradient>/g, '')
+          .replace(/<radialGradient[\s\S]*?<\/radialGradient>/g, '')
+          .replace(/<pattern[\s\S]*?<\/pattern>/g, '')
+          .replace(/<filter[\s\S]*?<\/filter>/g, '')
+          .replace(/<mask[\s\S]*?<\/mask>/g, '');
+      }
+    }
+    
+    return svgContent;
+  }
+
+  private static applySvgAttributes(optimisedSvg: string, svgConfig: Record<string, unknown>): string {
+    if (svgConfig.viewBox) {
+      optimisedSvg = optimisedSvg.replace(
+        /viewBox="[^"]*"/,
+        `viewBox="${svgConfig.viewBox}"`
+      );
+    }
+    
+    if (svgConfig.preserveAspectRatio) {
+      if (optimisedSvg.includes('preserveAspectRatio=')) {
+        optimisedSvg = optimisedSvg.replace(
+          /preserveAspectRatio="[^"]*"/,
+          `preserveAspectRatio="${svgConfig.preserveAspectRatio}"`
+        );
+      } else {
+        optimisedSvg = optimisedSvg.replace(
+          /<svg([^>]*)>/,
+          `<svg$1 preserveAspectRatio="${svgConfig.preserveAspectRatio}">`
+        );
+      }
+    }
+    
+    return optimisedSvg;
+  }
+
   private static async processSvgOutput(
     sourceImage: SourceImage,
     variant: AssetVariant,
@@ -474,91 +563,47 @@ export class ImageProcessor {
       throw new Error('SVG output from raster input not yet supported');
     }
 
-    const svgConfig = {
-      monochrome: variant.monochrome || variant.svg?.monochrome,
-      simplified: variant.simplified || variant.svg?.simplified,
-      viewBox: variant.viewBox || variant.svg?.viewBox,
-      preserveAspectRatio: variant.preserveAspectRatio || variant.svg?.preserveAspectRatio,
-      colorTransforms: variant.colorTransforms || variant.svg?.colorTransforms,
-      ...variant.svg
-    };
+    const svgConfig = this.parseSvgConfig(variant);
     const svgoPlugins: PluginConfig[] = [];
 
-      if (svgConfig.simplified) {
-        svgoPlugins.push(
-          { name: 'removeAttrs', params: { attrs: ['filter', 'gradient', 'mask', 'clip-path'] } }
-        );
-      }
+    if (svgConfig.simplified) {
+      svgoPlugins.push(
+        { name: 'removeAttrs', params: { attrs: ['filter', 'gradient', 'mask', 'clip-path'] } }
+      );
+    }
 
-      if (svgConfig.monochrome) {
-        svgContent = svgContent
-          .replace(/fill="[^"]*"/g, `fill="${svgConfig.monochrome}"`)
-          .replace(/stroke="[^"]*"/g, `stroke="${svgConfig.monochrome}"`)
-          .replace(/fill:[^;"}]*/g, `fill:${svgConfig.monochrome}`)
-          .replace(/stroke:[^;"}]*/g, `stroke:${svgConfig.monochrome}`)
-          .replace(/stop-color="[^"]*"/g, `stop-color="${svgConfig.monochrome}"`)
-          .replace(/stop-color:[^;"}]*/g, `stop-color:${svgConfig.monochrome}`);
-        
-        // Remove gradient and pattern definitions since they can't be monochrome
-        if (svgConfig.simplified) {
-          svgContent = svgContent
-            .replace(/<defs>[\s\S]*?<\/defs>/g, '')
-            .replace(/<linearGradient[\s\S]*?<\/linearGradient>/g, '')
-            .replace(/<radialGradient[\s\S]*?<\/radialGradient>/g, '')
-            .replace(/<pattern[\s\S]*?<\/pattern>/g, '')
-            .replace(/<filter[\s\S]*?<\/filter>/g, '')
-            .replace(/<mask[\s\S]*?<\/mask>/g, '');
-          
-          svgoPlugins.push({
-            name: 'removeAttrs',
-            params: { 
-              attrs: ['clip-path', 'mask', 'filter']
-            }
-          });
+    svgContent = this.transformSvgContent(svgContent, svgConfig);
+
+    if (svgConfig.monochrome && svgConfig.simplified) {
+      svgoPlugins.push({
+        name: 'removeAttrs',
+        params: { 
+          attrs: ['clip-path', 'mask', 'filter']
         }
-      }
+      });
+    }
 
-      if (svgConfig.colorTransforms && svgConfig.colorTransforms.length > 0) {
-        console.warn('Color transforms are not yet supported in SVG processing');
-      }
+    if (svgConfig.colorTransforms && Array.isArray(svgConfig.colorTransforms) && 
+        svgConfig.colorTransforms.length > 0) {
+      console.warn('Color transforms are not yet supported in SVG processing');
+    }
 
-      const svgoConfig: SvgoConfig = {
-        plugins: [
-          'preset-default',
-          ...svgoPlugins
-        ]
-      };
+    const svgoConfig: SvgoConfig = {
+      plugins: [
+        'preset-default',
+        ...svgoPlugins
+      ]
+    };
 
+    const result = svgoOptimize(svgContent, svgoConfig);
+    let optimisedSvg = result.data;
 
+    optimisedSvg = this.applySvgAttributes(optimisedSvg, svgConfig);
 
-      const result = svgoOptimize(svgContent, svgoConfig);
-      let optimisedSvg = result.data;
+    await fs.ensureDir(path.dirname(outputPath));
+    await fs.writeFile(outputPath, optimisedSvg, 'utf-8');
 
-      if (svgConfig.viewBox) {
-        optimisedSvg = optimisedSvg.replace(
-          /viewBox="[^"]*"/,
-          `viewBox="${svgConfig.viewBox}"`
-        );
-      }
-
-      if (svgConfig.preserveAspectRatio) {
-        if (optimisedSvg.includes('preserveAspectRatio=')) {
-          optimisedSvg = optimisedSvg.replace(
-            /preserveAspectRatio="[^"]*"/,
-            `preserveAspectRatio="${svgConfig.preserveAspectRatio}"`
-          );
-        } else {
-          optimisedSvg = optimisedSvg.replace(
-            /<svg([^>]*)>/,
-            `<svg$1 preserveAspectRatio="${svgConfig.preserveAspectRatio}">`
-          );
-        }
-      }
-
-      await fs.ensureDir(path.dirname(outputPath));
-      await fs.writeFile(outputPath, optimisedSvg, 'utf-8');
-
-      const stats = await fs.stat(outputPath);
+    const stats = await fs.stat(outputPath);
       
     return {
       name: variant.name,
