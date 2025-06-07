@@ -320,13 +320,13 @@ assets:
         width: 128
         height: 128
         format: png
-        overwrite: allow  # Silently overwrite (original behaviour)
+        overwrite: allow  # Silently overwrite existing files
 ```
 
 **Overwrite Modes:**
 - `error`: Fail processing when an output file already exists (default, safest)
 - `warn`: Log a warning but proceed with overwriting (useful for development)
-- `allow`: Silently overwrite existing files (original behaviour, fastest)
+- `allow`: Silently overwrite existing files (fastest)
 
 **CLI Override:**
 ```bash
