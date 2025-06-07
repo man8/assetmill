@@ -19,16 +19,19 @@ import { PlatformGenerator } from '../generators/platform-generator';
 import { ValidationUtils } from '../utils/validation';
 import { FileUtils } from '../utils/file-utils';
 import { Logger } from '../utils/logger';
+import { FileExistsError } from '../utils/errors';
 
 export class AssetPipeline {
   private config: PipelineConfig;
   private dryRun: boolean;
   private overwriteMode: OverwriteMode;
+  private failedAssetCount: number = 0;
 
   constructor(config: PipelineConfig, dryRun: boolean = false, overwriteMode?: OverwriteMode) {
     this.config = config;
     this.dryRun = dryRun;
     this.overwriteMode = overwriteMode || config.output.overwrite;
+    this.failedAssetCount = 0;
   }
 
   async execute(): Promise<ProcessingResult> {
@@ -69,10 +72,17 @@ export class AssetPipeline {
         result.assets.push(...imageAssets);
       }
 
-      result.success = true;
       result.metrics = this.calculateMetrics(result.assets, startTime);
+      result.success = result.metrics.failedAssets === 0;
 
-      Logger.success(`Pipeline completed successfully!`);
+      if (result.metrics.failedAssets > 0) {
+        Logger.warn(
+          `Pipeline completed with ${result.metrics.failedAssets} failures, ` +
+          `${result.metrics.successfulAssets} successes`
+        );
+      } else {
+        Logger.success(`Pipeline completed successfully!`);
+      }
       Logger.info(`Generated ${result.assets.length} assets`);
       Logger.info(`Total file size: ${FileUtils.formatFileSize(result.metrics.totalFileSize)}`);
       Logger.info(`Processing time: ${result.metrics.processingTime}ms`);
@@ -188,7 +198,13 @@ export class AssetPipeline {
         assets.push(asset);
       } catch (error) {
         const variantObj = variant as Record<string, unknown>;
-        Logger.error(`Failed to generate asset ${variantObj.name}`, error as Error);
+        this.failedAssetCount++;
+        if (error instanceof FileExistsError) {
+          Logger.error(`Failed to generate asset ${variantObj.name}: File already exists`);
+          Logger.info(`  → Use --force flag or set 'overwrite: allow' in config to overwrite existing files`);
+        } else {
+          Logger.error(`Failed to generate asset ${variantObj.name}`, error as Error);
+        }
       }
     }
 
@@ -232,9 +248,9 @@ export class AssetPipeline {
     const totalFileSize = assets.reduce((sum, asset) => sum + asset.fileSize, 0);
 
     return {
-      totalAssets: assets.length,
+      totalAssets: assets.length + this.failedAssetCount,
       successfulAssets: assets.length,
-      failedAssets: 0,
+      failedAssets: this.failedAssetCount,
       totalFileSize,
       processingTime: Date.now() - startTime,
     };
@@ -252,16 +268,19 @@ export class AssetPipeline {
     if (faviconAssets.length > 0) {
       const webmanifest = FaviconGenerator.generateWebmanifest(faviconAssets);
       const webmanifestPath = path.join(this.config.output.directory, 'site.webmanifest');
+      await FileUtils.checkOverwritePermission(webmanifestPath, this.overwriteMode);
       await FileUtils.writeTextFile(webmanifestPath, webmanifest);
       Logger.success('Generated site.webmanifest');
 
       const browserConfig = FaviconGenerator.generateBrowserConfigXml(faviconAssets);
       const browserConfigPath = path.join(this.config.output.directory, 'browserconfig.xml');
+      await FileUtils.checkOverwritePermission(browserConfigPath, this.overwriteMode);
       await FileUtils.writeTextFile(browserConfigPath, browserConfig);
       Logger.success('Generated browserconfig.xml');
 
       const htmlTags = FaviconGenerator.generateHtmlTags(faviconAssets);
       const htmlTagsPath = path.join(this.config.output.directory, 'favicon-tags.html');
+      await FileUtils.checkOverwritePermission(htmlTagsPath, this.overwriteMode);
       await FileUtils.writeTextFile(htmlTagsPath, htmlTags.join('\n'));
       Logger.success('Generated favicon-tags.html');
     }
@@ -269,6 +288,7 @@ export class AssetPipeline {
     if (socialAssets.length > 0) {
       const metaTags = SocialGenerator.generateMetaTags(socialAssets);
       const metaTagsPath = path.join(this.config.output.directory, 'social-meta-tags.html');
+      await FileUtils.checkOverwritePermission(metaTagsPath, this.overwriteMode);
       await FileUtils.writeTextFile(metaTagsPath, metaTags.join('\n'));
       Logger.success('Generated social-meta-tags.html');
     }

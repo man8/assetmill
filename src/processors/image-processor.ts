@@ -211,6 +211,9 @@ export class ImageProcessor {
 
       return await this.applyFormatAndSave(pipeline, variant, outputPath, options);
     } catch (error) {
+      if (error instanceof Error && error.name === 'FileExistsError') {
+        throw error;
+      }
       throw new Error(`Failed to process image ${sourceImage.path} for variant ${variant.name}: ${error}`);
     }
   }
@@ -432,6 +435,9 @@ export class ImageProcessor {
 
     await fs.ensureDir(path.dirname(outputPath));
     
+    if (options.overwriteMode) {
+      await FileUtils.checkOverwritePermission(outputPath, options.overwriteMode);
+    }
     const icoBuffer = await this.createIcoFile(buffers, sizes);
     await fs.writeFile(outputPath, icoBuffer);
 
