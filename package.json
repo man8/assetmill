@@ -1,6 +1,6 @@
 {
   "name": "@man8/assetmill",
-  "version": "0.2.1",
+  "version": "0.2.2-dev.0",
   "description": "A powerful command-line tool for automated image asset processing and optimization. Generate multiple sizes, formats, and variants from source images.",
   "main": "dist/index.js",
   "bin": {
@@ -16,7 +16,18 @@
     "format": "prettier --write src/**/*.ts",
     "ci": "npm run build && npm test && npm run lint",
     "prepare": "npm run build",
-    "prepublishOnly": "npm test && npm run lint"
+    "prepublishOnly": "npm test && npm run lint",
+    "version:patch": "npm version patch",
+    "version:minor": "npm version minor",
+    "version:major": "npm version major",
+    "preversion": "npm run changelog:validate && npm run ci",
+    "postversion": "git push && git push --tags && npm run version:dev",
+    "version:dev": "npm version patch --preid=dev --prerelease --no-git-tag-version && git add package.json package-lock.json && git commit -m 'chore: bump to development version'",
+    "changelog:prepare": "node scripts/prepare-changelog.js",
+    "changelog:validate": "node scripts/validate-changelog.js",
+    "release:patch": "npm run changelog:prepare patch && npm run version:patch",
+    "release:minor": "npm run changelog:prepare minor && npm run version:minor",
+    "release:major": "npm run changelog:prepare major && npm run version:major"
   },
   "keywords": [
     "asset",
