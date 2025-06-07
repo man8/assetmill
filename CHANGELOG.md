@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed npx installation failing due to missing dist folder in published package (improved release validation and process)
 - Fixed Sharp image processing library compatibility on ARM64 macOS (upgraded from 0.33.0 to 0.34.2)
+- Fixed Windows CI test failures due to Unix-style path assumptions in test files and validation logic
 
 ## [0.2.1] - 2025-06-06
 
