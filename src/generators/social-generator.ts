@@ -52,6 +52,7 @@ export class SocialGenerator {
         quality: config.processing.quality.png,
         background: variant.background,
         margin: variant.margin,
+        overwriteMode: variant.overwrite || config.output.overwrite,
       }, config);
       assets.push(asset);
     }

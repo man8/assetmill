@@ -276,6 +276,7 @@ describe('Configuration validation', () => {
             variables: {},
           },
           formats: ['png', 'webp'],
+          overwrite: 'error',
         },
         assets: [
           {

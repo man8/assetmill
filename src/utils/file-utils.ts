@@ -1,6 +1,7 @@
 import * as fs from 'fs-extra';
 import path from 'path';
 import { glob } from 'glob';
+import { OverwriteMode } from '../types';
 
 export class FileUtils {
   static async ensureDirectory(dirPath: string): Promise<void> {
@@ -69,5 +70,20 @@ export class FileUtils {
 
   static getBaseName(filePath: string): string {
     return path.basename(filePath, path.extname(filePath));
+  }
+
+  static async checkOverwritePermission(
+    filePath: string, 
+    mode: OverwriteMode
+  ): Promise<void> {
+    const exists = await this.fileExists(filePath);
+    if (!exists) return;
+    
+    if (mode === 'error') {
+      throw new Error(`Output file already exists: ${filePath}`);
+    } else if (mode === 'warn') {
+      const { Logger } = await import('./logger');
+      Logger.warn(`Overwriting existing file: ${filePath}`);
+    }
   }
 }

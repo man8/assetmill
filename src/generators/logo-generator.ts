@@ -59,6 +59,7 @@ export class LogoGenerator {
         const asset = await ImageProcessor.processImage(sourceImage, variant, outputPath, {
           quality: config.processing.quality[format as keyof typeof config.processing.quality],
           theme,
+          overwriteMode: variant.overwrite || config.output.overwrite,
         }, config);
 
         assets.push(asset);

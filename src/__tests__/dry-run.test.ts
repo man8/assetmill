@@ -46,7 +46,8 @@ describe('Dry-run functionality', () => {
         naming: {
           template: '{name}',
           variables: {}
-        }
+        },
+        overwrite: 'error'
       },
       assets: [
         {
@@ -146,7 +147,8 @@ describe('Dry-run functionality', () => {
         naming: {
           template: '{name}',
           variables: {}
-        }
+        },
+        overwrite: 'error'
       },
       assets: [
         {

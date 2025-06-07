@@ -3,7 +3,7 @@ import { ConfigLoader } from '../../config/loader';
 import { AssetPipeline } from '../../pipeline/asset-pipeline';
 import { Logger, LogLevel } from '../../utils/logger';
 import * as path from 'path';
-import { CLIOptions } from '../../types';
+import { CLIOptions, OverwriteMode } from '../../types';
 
 export function createGenerateCommand(): Command {
   const command = new Command('generate');
@@ -64,7 +64,8 @@ export function createGenerateCommand(): Command {
           config.output.formats = options.format;
         }
 
-        const pipeline = new AssetPipeline(config, options.dryRun);
+        const overwriteMode: OverwriteMode = options.force ? 'allow' : config.output.overwrite;
+        const pipeline = new AssetPipeline(config, options.dryRun, overwriteMode);
 
         Logger.info('Starting asset generation...');
         const result = await pipeline.execute();

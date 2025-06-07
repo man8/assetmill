@@ -24,12 +24,13 @@ export class FaviconGenerator {
       const outputPath = path.join(faviconDir, `${variant.name}.${variant.format}`);
       const asset = await ImageProcessor.processImage(sourceImage, variant, outputPath, {
         quality: config.processing.quality.png,
+        overwriteMode: variant.overwrite || config.output.overwrite,
       }, config);
       assets.push(asset);
     }
 
     const faviconIcoPath = path.join(faviconDir, 'favicon.ico');
-    const icoAssets = await ImageProcessor.generateFavicon(sourceImage, faviconIcoPath);
+    const icoAssets = await ImageProcessor.generateFavicon(sourceImage, faviconIcoPath, config.output.overwrite);
     assets.push(...icoAssets);
 
     return assets;

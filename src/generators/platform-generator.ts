@@ -42,6 +42,7 @@ export class PlatformGenerator {
             config.processing.quality[variant.format as keyof typeof config.processing.quality],
           background: variant.background,
           margin: variant.margin,
+          overwriteMode: variant.overwrite || config.output.overwrite,
         }, config);
 
         assets.push(processedAsset);
