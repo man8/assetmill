@@ -504,21 +504,21 @@ export class ImageProcessor {
   private static transformSvgContent(svgContent: string, svgConfig: Record<string, unknown>): string {
     if (svgConfig.monochrome) {
       svgContent = svgContent
-        .replace(/fill="[^"]*"/g, `fill="${svgConfig.monochrome}"`)
-        .replace(/stroke="[^"]*"/g, `stroke="${svgConfig.monochrome}"`)
-        .replace(/fill:[^;"}]*/g, `fill:${svgConfig.monochrome}`)
-        .replace(/stroke:[^;"}]*/g, `stroke:${svgConfig.monochrome}`)
-        .replace(/stop-color="[^"]*"/g, `stop-color="${svgConfig.monochrome}"`)
-        .replace(/stop-color:[^;"}]*/g, `stop-color:${svgConfig.monochrome}`);
+        .replace(/fill="[^"]{0,100}"/g, `fill="${svgConfig.monochrome}"`)
+        .replace(/stroke="[^"]{0,100}"/g, `stroke="${svgConfig.monochrome}"`)
+        .replace(/fill:[^;"}]{0,100}/g, `fill:${svgConfig.monochrome}`)
+        .replace(/stroke:[^;"}]{0,100}/g, `stroke:${svgConfig.monochrome}`)
+        .replace(/stop-color="[^"]{0,100}"/g, `stop-color="${svgConfig.monochrome}"`)
+        .replace(/stop-color:[^;"}]{0,100}/g, `stop-color:${svgConfig.monochrome}`);
       
       if (svgConfig.simplified) {
         svgContent = svgContent
-          .replace(/<defs>[\s\S]*?<\/defs>/g, '')
-          .replace(/<linearGradient[\s\S]*?<\/linearGradient>/g, '')
-          .replace(/<radialGradient[\s\S]*?<\/radialGradient>/g, '')
-          .replace(/<pattern[\s\S]*?<\/pattern>/g, '')
-          .replace(/<filter[\s\S]*?<\/filter>/g, '')
-          .replace(/<mask[\s\S]*?<\/mask>/g, '');
+          .replace(/<defs\b[^>]*>[\s\S]{0,10000}?<\/defs>/g, '')
+          .replace(/<linearGradient\b[^>]*>[\s\S]{0,5000}?<\/linearGradient>/g, '')
+          .replace(/<radialGradient\b[^>]*>[\s\S]{0,5000}?<\/radialGradient>/g, '')
+          .replace(/<pattern\b[^>]*>[\s\S]{0,5000}?<\/pattern>/g, '')
+          .replace(/<filter\b[^>]*>[\s\S]{0,5000}?<\/filter>/g, '')
+          .replace(/<mask\b[^>]*>[\s\S]{0,5000}?<\/mask>/g, '');
       }
     }
     
@@ -528,7 +528,7 @@ export class ImageProcessor {
   private static applySvgAttributes(optimisedSvg: string, svgConfig: Record<string, unknown>): string {
     if (svgConfig.viewBox) {
       optimisedSvg = optimisedSvg.replace(
-        /viewBox="[^"]*"/,
+        /viewBox="[^"]{0,100}"/,
         `viewBox="${svgConfig.viewBox}"`
       );
     }
@@ -536,12 +536,12 @@ export class ImageProcessor {
     if (svgConfig.preserveAspectRatio) {
       if (optimisedSvg.includes('preserveAspectRatio=')) {
         optimisedSvg = optimisedSvg.replace(
-          /preserveAspectRatio="[^"]*"/,
+          /preserveAspectRatio="[^"]{0,50}"/,
           `preserveAspectRatio="${svgConfig.preserveAspectRatio}"`
         );
       } else {
         optimisedSvg = optimisedSvg.replace(
-          /<svg\s+([^>]*?)>/,
+          /<svg\s+([^>]{0,1000}?)>/,
           `<svg $1 preserveAspectRatio="${svgConfig.preserveAspectRatio}">`
         );
       }
