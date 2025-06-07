@@ -5,25 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0](https://github.com/man8/assetmill/compare/v0.2.1...v0.3.0) (2025-06-07)
+
 
 ### Added
-- **File Overwrite Control**: New configuration option to control file overwriting behaviour with three modes:
-  - `allow`: Silently overwrite existing files
-  - `warn`: Log a warning but proceed with overwriting
-  - `error`: Fail processing when an output file already exists (new default)
-- Global overwrite setting in `output.overwrite` configuration
-- Per-variant overwrite setting in `AssetVariant.overwrite` configuration
-- CLI `--force` flag now overrides any overwrite configuration settings
 
-### Changed
-- **BREAKING CHANGE**: Default behaviour now prevents file overwriting unless explicitly configured
-- Improved release workflow with better automation and validation
+* add build step to prepublishOnly script ([#13](https://github.com/man8/assetmill/issues/13)) ([f7ece27](https://github.com/man8/assetmill/commit/f7ece27fa5e920f9fab3d764a5237007a81b848e))
+* implement overwrite control feature (MAN8-4764) ([#16](https://github.com/man8/assetmill/issues/16)) ([63bd189](https://github.com/man8/assetmill/commit/63bd18971ddf8ad18dfc6360d8c432ace7e0c85b))
+* **release:** automate changelog management and version workflows ([638fe0b](https://github.com/man8/assetmill/commit/638fe0b1290ecf2f3ddd356224c8562a3375958f))
+* **release:** migrate to commit-and-tag-version for automated release management ([8e75db7](https://github.com/man8/assetmill/commit/8e75db72fb0ea33d813bde7c969fb7c5c31fee90))
+
 
 ### Fixed
-- Fixed npx installation failing due to missing dist folder in published package (improved release validation and process)
-- Fixed Sharp image processing library compatibility on ARM64 macOS (upgraded from 0.33.0 to 0.34.2)
-- Fixed Windows CI test failures due to Unix-style path assumptions in test files and validation logic
+
+* upgrade Sharp to 0.34.2 for ARM64 macOS compatibility ([6e7983d](https://github.com/man8/assetmill/commit/6e7983d5677c40899b021f8bef957008cdb74264))
+
+
+### Changed
+
+* clean-up ([eb9edb9](https://github.com/man8/assetmill/commit/eb9edb970b84e6872083b77cc5f5a495261f5c97))
+* enhance README with tool intent ([#18](https://github.com/man8/assetmill/issues/18)) ([f019f22](https://github.com/man8/assetmill/commit/f019f22bae6af08bc97ca23e5b4e5388d23f89ef))
+* extract helper methods from complex ImageProcessor methods ([#15](https://github.com/man8/assetmill/issues/15)) ([b4c591e](https://github.com/man8/assetmill/commit/b4c591e006dbe390768b922ac57f8bf454bc263c))
 
 ## [0.2.1] - 2025-06-06
 
