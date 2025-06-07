@@ -42,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-06-06
 
 ### Added
-- Initial release of AssetMill brand asset pipeline CLI tool
+- Initial release of assetmill brand asset pipeline CLI tool
 - Comprehensive image asset generation for web applications
 - Support for favicon generation (multiple sizes and formats)
 - Social media asset generation (Open Graph, Twitter, LinkedIn, Facebook)

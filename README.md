@@ -293,7 +293,7 @@ margin:
 
 ### File Overwrite Control
 
-Control how AssetMill handles existing output files:
+Control how assetmill handles existing output files:
 
 ```yaml
 # Global overwrite setting

@@ -1,6 +1,6 @@
-# Contributing to AssetMill
+# Contributing to assetmill
 
-Thank you for your interest in contributing to AssetMill! This document provides guidelines for contributing to the project.
+Thank you for your interest in contributing to assetmill! This document provides guidelines for contributing to the project.
 
 ## Development Setup
 
