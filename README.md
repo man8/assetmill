@@ -321,13 +321,13 @@ assets:
         height: 32
         format: png
         overwrite: error  # Fail if file exists (safest)
-      
+
       - name: temp-preview
         width: 64
         height: 64
         format: png
         overwrite: warn   # Warn but proceed with overwriting
-      
+
       - name: cache-file
         width: 128
         height: 128
@@ -451,11 +451,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 We're actively working on expanding assetmill's capabilities. If you have feature requests or suggestions, please:
 - 🚀 [Submit a feature request](https://github.com/man8/assetmill/issues/new?template=feature_request.md)
-- 💡 [Join the discussion](https://github.com/man8/assetmill/discussions)
 - 🤝 [Contribute to development](CONTRIBUTING.md)
 
 ## Support
 
 - 📖 [Documentation](https://github.com/man8/assetmill#readme)
 - 🐛 [Issue Tracker](https://github.com/man8/assetmill/issues)
-- 💬 [Discussions](https://github.com/man8/assetmill/discussions)

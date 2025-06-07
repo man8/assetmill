@@ -59,7 +59,7 @@ Thank you for your interest in contributing to assetmill! This document provides
 
 - Use TypeScript for all new code
 - Follow the existing ESLint configuration
-- Use British English for documentation and user-facing strings
+- Use English for documentation and user-facing strings
 - Maximum line length: 119 characters
 - Add proper JSDoc documentation for all public functions and classes
 
@@ -73,7 +73,7 @@ Thank you for your interest in contributing to assetmill! This document provides
 ## Documentation
 
 - Update README.md if adding new features
-- Use British English spelling and terminology
+- Use English spelling and terminology
 - Include code examples where appropriate
 - Update CHANGELOG.md for significant changes
 
