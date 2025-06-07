@@ -296,28 +296,47 @@ margin:
 Control how AssetMill handles existing output files:
 
 ```yaml
+# Global overwrite setting
 output:
-  overwrite: error  # Global setting: 'allow', 'warn', or 'error'
+  overwrite: error  # Default: fail when files exist
 
+# Per-variant overwrite examples
 assets:
-  - name: logo
+  - name: production-assets
     variants:
-      - name: logo-32
+      - name: favicon-32
         width: 32
         height: 32
         format: png
-        overwrite: allow  # Per-variant override
+        overwrite: error  # Fail if file exists (safest)
+      
+      - name: temp-preview
+        width: 64
+        height: 64
+        format: png
+        overwrite: warn   # Warn but proceed with overwriting
+      
+      - name: cache-file
+        width: 128
+        height: 128
+        format: png
+        overwrite: allow  # Silently overwrite (original behaviour)
 ```
 
 **Overwrite Modes:**
-- `allow`: Silently overwrite existing files (original behaviour)
-- `warn`: Log a warning but proceed with overwriting
-- `error`: Fail processing when an output file already exists (default)
+- `error`: Fail processing when an output file already exists (default, safest)
+- `warn`: Log a warning but proceed with overwriting (useful for development)
+- `allow`: Silently overwrite existing files (original behaviour, fastest)
 
 **CLI Override:**
 ```bash
 # Force overwrite regardless of configuration
 assetmill generate --force
+
+# Examples with different scenarios
+assetmill generate                    # Respects config (default: error)
+assetmill generate --force            # Always overwrites
+assetmill generate --config dev.yml   # Uses dev config (might be 'allow')
 ```
 
 ### Theme Variants
