@@ -432,6 +432,9 @@ export class ImageProcessor {
 
     await fs.ensureDir(path.dirname(outputPath));
     
+    if (options.overwriteMode) {
+      await FileUtils.checkOverwritePermission(outputPath, options.overwriteMode);
+    }
     const icoBuffer = await this.createIcoFile(buffers, sizes);
     await fs.writeFile(outputPath, icoBuffer);
 
