@@ -3,6 +3,7 @@ import { AssetPipeline } from '../pipeline/asset-pipeline';
 import { OutputFormat } from '../types';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import * as os from 'os';
 
 describe('Output Directory Path Resolution', () => {
   const testDir = path.join(__dirname, 'output-test-fixtures');
@@ -109,7 +110,7 @@ assets:
     it('should resolve relative asset outputPath relative to main output directory', () => {
       const mockConfig = {
         output: {
-          directory: '/test/output',
+          directory: path.resolve(os.tmpdir(), 'test-output'),
           formats: ['png' as OutputFormat],
           structure: {
             favicon: 'favicons',
@@ -154,7 +155,9 @@ assets:
         }
       };
 
-      expect(path.join(mockConfig.output.directory, './subfolder')).toBe('/test/output/subfolder');
+      expect(path.join(mockConfig.output.directory, './subfolder')).toBe(
+        path.join(mockConfig.output.directory, 'subfolder')
+      );
       expect('/absolute/path').toBe('/absolute/path');
     });
   });

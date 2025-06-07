@@ -2,6 +2,7 @@ import { ValidationUtils } from '../utils/validation';
 import { AssetVariant, PipelineConfig } from '../types';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import * as os from 'os';
 
 describe('ValidationUtils', () => {
   const testDir = path.join(__dirname, 'fixtures');
@@ -297,7 +298,7 @@ describe('ValidationUtils', () => {
     it('should detect duplicate output paths from different assets', () => {
       const config: Partial<PipelineConfig> = {
         output: { 
-          directory: '/test/output',
+          directory: path.resolve(os.tmpdir(), 'test-output'),
           structure: {
             favicon: 'favicons',
             social: 'social',
@@ -335,7 +336,7 @@ describe('ValidationUtils', () => {
     it('should not report duplicates for different file names', () => {
       const config: Partial<PipelineConfig> = {
         output: { 
-          directory: '/test/output',
+          directory: path.resolve(os.tmpdir(), 'test-output'),
           structure: {
             favicon: 'favicons',
             social: 'social',
@@ -371,7 +372,7 @@ describe('ValidationUtils', () => {
     it('should detect duplicates across different output paths that resolve to same location', () => {
       const config: Partial<PipelineConfig> = {
         output: { 
-          directory: '/test/output',
+          directory: path.resolve(os.tmpdir(), 'test-output'),
           structure: {
             favicon: 'favicons',
             social: 'social',

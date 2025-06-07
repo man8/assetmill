@@ -1,6 +1,7 @@
 import { PipelineConfig, SourceImage, AssetVariant } from '../types';
 import { FileUtils } from './file-utils';
 import { ImageProcessor } from '../processors/image-processor';
+import { normalizePath } from './path-utils';
 import path from 'path';
 
 export class ValidationUtils {
@@ -124,11 +125,11 @@ export class ValidationUtils {
       const baseOutputPath = asset.outputPath || './';
       
       asset.variants.forEach((variant) => {
-        const fullOutputPath = path.join(
+        const fullOutputPath = normalizePath(path.join(
           config.output.directory,
           baseOutputPath,
           `${variant.name}.${variant.format}`
-        ).replace(/\\/g, '/');
+        ));
         
         if (!outputPaths.has(fullOutputPath)) {
           outputPaths.set(fullOutputPath, []);
