@@ -1,6 +1,18 @@
 # assetmill
 
-A powerful command-line tool for automated image asset processing and optimization. Generate multiple sizes, formats, and variants from source images with consistent quality and specifications.
+A powerful command-line tool for automated generation of optimised image assets from source images. Designed to eliminate manual resizing and format conversion while ensuring uniform quality and specifications across all generated assets.
+
+## Why assetmill?
+
+Modern web development requires multiple image variants for different platforms, devices, and use cases. assetmill automates this process, providing:
+
+- **Automation**: Eliminate manual resizing and format conversion of image assets
+- **Consistency**: Ensure uniform quality and specifications across all generated assets  
+- **Integration**: Seamless incorporation into existing development workflows and CI/CD pipelines
+- **Flexibility**: Support for custom sizes, formats, and optimisation parameters
+- **Performance**: Fast processing suitable for development and build environments
+
+**Target Users**: Frontend developers, web designers, DevOps engineers, open-source projects, and marketing teams requiring standardised image deliverables.
 
 ## Features
 
