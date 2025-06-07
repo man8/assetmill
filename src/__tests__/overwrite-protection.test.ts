@@ -11,6 +11,7 @@ describe('File Overwrite Protection', () => {
   
   let loggerErrorSpy: jest.SpyInstance;
   let loggerWarnSpy: jest.SpyInstance;
+  let loggerInfoSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     await fs.ensureDir(testOutputDir);
@@ -22,6 +23,7 @@ describe('File Overwrite Protection', () => {
     
     loggerErrorSpy = jest.spyOn(Logger, 'error').mockImplementation(() => {});
     loggerWarnSpy = jest.spyOn(Logger, 'warn').mockImplementation(() => {});
+    loggerInfoSpy = jest.spyOn(Logger, 'info').mockImplementation(() => {});
   });
 
   afterEach(async () => {
@@ -112,11 +114,10 @@ describe('File Overwrite Protection', () => {
     expect(result.success).toBe(false);
     expect(result.metrics.failedAssets).toBe(1);
     
-    const errorCall = loggerErrorSpy.mock.calls[0];
-    expect(errorCall[0]).toBe('Failed to generate asset test-favicon');
-    expect(errorCall[1]).toBeInstanceOf(Error);
-    expect(errorCall[1].message).toContain('FileExistsError');
-    expect(errorCall[1].message).toContain('Output file already exists');
+    expect(loggerErrorSpy).toHaveBeenCalledWith('Failed to generate asset test-favicon: File already exists');
+    expect(loggerInfoSpy).toHaveBeenCalledWith(
+      '  → Use --force flag or set \'overwrite: allow\' in config to overwrite existing files'
+    );
   });
 
   it('should emit warning message when file exists and overwrite mode is warn', async () => {

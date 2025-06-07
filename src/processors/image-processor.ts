@@ -211,6 +211,9 @@ export class ImageProcessor {
 
       return await this.applyFormatAndSave(pipeline, variant, outputPath, options);
     } catch (error) {
+      if (error instanceof Error && error.name === 'FileExistsError') {
+        throw error;
+      }
       throw new Error(`Failed to process image ${sourceImage.path} for variant ${variant.name}: ${error}`);
     }
   }
