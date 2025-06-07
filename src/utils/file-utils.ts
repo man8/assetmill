@@ -2,6 +2,7 @@ import * as fs from 'fs-extra';
 import path from 'path';
 import { glob } from 'glob';
 import { OverwriteMode } from '../types';
+import { FileExistsError } from './errors';
 
 export class FileUtils {
   static async ensureDirectory(dirPath: string): Promise<void> {
@@ -80,7 +81,7 @@ export class FileUtils {
     if (!exists) return;
     
     if (mode === 'error') {
-      throw new Error(`Output file already exists: ${filePath}`);
+      throw new FileExistsError(`Output file already exists: ${filePath}`);
     } else if (mode === 'warn') {
       const { Logger } = await import('./logger');
       Logger.warn(`Overwriting existing file: ${filePath}`);
