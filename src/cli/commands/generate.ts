@@ -100,7 +100,7 @@ export function createGenerateCommand(): Command {
           });
         }
 
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (error instanceof ConfigurationNotFoundError) {
           Logger.error(`Configuration file not found: ${error.filePath}`);
           Logger.info('  → Use "assetmill init" to create a configuration file');
@@ -112,7 +112,7 @@ export function createGenerateCommand(): Command {
           Logger.error('YAML parsing failed:');
           Logger.error(`  → ${error.message}`);
           Logger.info('  → Check your YAML syntax and indentation');
-        } else if (error.message.includes('Permission denied')) {
+        } else if (error instanceof Error && error.message.includes('Permission denied')) {
           Logger.error(`Permission denied: ${error.message}`);
           Logger.info('  → Check file permissions and try running with appropriate privileges');
         } else {
