@@ -296,8 +296,8 @@ variants:
 **Transformation Order**:
 The processing pipeline applies transformations in this order:
 1. **Theme processing** (including monochrome conversion)
-2. **Margin application** (if specified)
-3. **Resize and background application**
+2. **Background application** (if specified)
+3. **Margin application** (if specified)
 
 This order ensures that when combining monochrome and background parameters, the monochrome theme is applied to the logo content first, then the background colour is applied separately. This produces the expected result of a monochrome logo on a coloured background.
 
