@@ -205,7 +205,7 @@ The assetmill tool preserves image quality and proportions through intelligent p
 #### Aspect Ratio Preservation
 - **Images are never stretched or distorted** - original proportions are always maintained
 - When both width and height are specified, the image is scaled to fit within those dimensions
-- **Automatic transparent margins** are added when the requested dimensions don't match the source aspect ratio
+- **Automatic margins** are added when the requested dimensions don't match the source aspect ratio (using the specified background colour, or transparent if none specified)
 - This ensures consistent visual quality across all generated assets
 
 #### Background Colour
@@ -226,7 +226,7 @@ variants:
 #### Margin Handling
 - **Margins are included within the requested dimensions** - not added on top
 - When margins are specified, the image is scaled to fit within the content area (total dimensions minus margins)
-- Transparent margins are then added to reach the exact requested dimensions
+- Margins are then added to reach the exact requested dimensions (using the specified background colour, or transparent if none specified)
 - This ensures output files match the specified width and height exactly
 
 **Important**: Margins are only supported for raster output formats (PNG, JPEG, WebP, AVIF, ICO). Specifying margin settings with SVG output format will result in a validation error, as SVG processing uses markup transformation rather than canvas manipulation.
@@ -253,7 +253,7 @@ variants:
 variants:
   - name: square-icon
     width: 512
-    height: 512    # If source is rectangular, transparent margins added to make square
+    height: 512    # If source is rectangular, margins added to make square (using background colour if specified)
     format: png
 
   - name: proportional-resize
@@ -304,7 +304,7 @@ This order ensures that when combining monochrome and background parameters, the
 #### Examples
 - **Source**: 800x600 image (4:3 ratio)
 - **Requested**: 512x512 (1:1 ratio)
-- **Result**: Image scaled to 512x384, centred in 512x512 canvas with transparent margins
+- **Result**: Image scaled to 512x384, centred in 512x512 canvas with margins (transparent unless background colour specified)
 - **With 10% margin**: Image scaled to ~410x307, centred in 512x512 canvas with 51px margins
 
 ### Margin and Padding
