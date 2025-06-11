@@ -2,6 +2,8 @@
 
 A powerful command-line tool for automated generation of optimised image assets from source images. Designed to eliminate manual resizing and format conversion while ensuring uniform quality and specifications across all generated assets.
 
+> **⚠️ Pre-release Software**: assetmill is currently in active development (v0.3.0). Breaking changes and behaviour modifications may occur until v1.0.0 is released. Please review the [changelog](CHANGELOG.md) when updating versions.
+
 ## Why assetmill?
 
 Modern web development requires multiple image variants for different platforms, devices, and use cases. assetmill automates this process, providing:
