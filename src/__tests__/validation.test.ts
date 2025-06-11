@@ -61,6 +61,70 @@ describe('ValidationUtils', () => {
       expect(errors).toContain('Width must be greater than 0');
       expect(errors).toContain('Quality must be between 1 and 100');
     });
+
+    it('should reject SVG format with margin settings', () => {
+      const variant: AssetVariant = {
+        name: 'svg-with-margin',
+        width: 100,
+        height: 100,
+        format: 'svg',
+        margin: {
+          all: '10%'
+        }
+      };
+
+      const errors = ValidationUtils.validateAssetVariant(variant);
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors).toContain(
+        'Margin settings are not supported for SVG output format. ' +
+        'SVG processing uses markup transformation rather than canvas manipulation. ' +
+        'Use a raster format (PNG, JPEG, WebP, AVIF, ICO) if margins are required.'
+      );
+    });
+
+    it('should reject SVG format with any margin property defined', () => {
+      const variants = [
+        { name: 'svg-top-margin', format: 'svg' as const, margin: { top: 10 } },
+        { name: 'svg-horizontal-margin', format: 'svg' as const, margin: { horizontal: '5%' } },
+        { name: 'svg-vertical-margin', format: 'svg' as const, margin: { vertical: 20 } },
+        { name: 'svg-left-margin', format: 'svg' as const, margin: { left: 15 } },
+      ];
+
+      variants.forEach(variant => {
+        const errors = ValidationUtils.validateAssetVariant(variant);
+        expect(errors.length).toBeGreaterThan(0);
+        expect(errors.some(error => 
+          error.includes('Margin settings are not supported for SVG output format')
+        )).toBe(true);
+      });
+    });
+
+    it('should allow raster formats with margin settings', () => {
+      const variants = [
+        { name: 'png-with-margin', format: 'png' as const, margin: { all: '10%' } },
+        { name: 'jpeg-with-margin', format: 'jpeg' as const, margin: { horizontal: 20 } },
+        { name: 'webp-with-margin', format: 'webp' as const, margin: { top: 10, bottom: 10 } },
+      ];
+
+      variants.forEach(variant => {
+        const errors = ValidationUtils.validateAssetVariant(variant);
+        const hasMarginError = errors.some(error => error.includes('Margin settings are not supported'));
+        expect(hasMarginError).toBe(false);
+      });
+    });
+
+    it('should allow SVG format without margin settings', () => {
+      const variant: AssetVariant = {
+        name: 'svg-no-margin',
+        width: 100,
+        height: 100,
+        format: 'svg'
+      };
+
+      const errors = ValidationUtils.validateAssetVariant(variant);
+      const hasMarginError = errors.some(error => error.includes('Margin settings are not supported'));
+      expect(hasMarginError).toBe(false);
+    });
   });
 
   describe('isValidImageFormat', () => {
