@@ -176,7 +176,7 @@ describe('Dry-run functionality', () => {
       }
     };
 
-    const pipeline = new AssetPipeline(config);
+    const pipeline = new AssetPipeline(config, true);
     await pipeline.execute();
 
     const outputPath = path.join(testDir, 'test-output.png');
