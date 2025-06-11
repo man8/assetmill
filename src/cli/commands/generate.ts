@@ -80,8 +80,13 @@ export function createGenerateCommand(): Command {
 
         const { assets, metrics } = result;
         Logger.info('');
-        Logger.success('Asset generation completed successfully!');
-        Logger.info(`Generated ${assets.length} assets in ${metrics.processingTime}ms`);
+        if (options.dryRun) {
+          Logger.success('Dry run simulation completed successfully!');
+          Logger.info(`Would generate ${assets.length} assets (estimated processing time: ${metrics.processingTime}ms)`);
+        } else {
+          Logger.success('Asset generation completed successfully!');
+          Logger.info(`Generated ${assets.length} assets in ${metrics.processingTime}ms`);
+        }
 
         if (options.verbose) {
           Logger.info('');

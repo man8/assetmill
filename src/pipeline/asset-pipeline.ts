@@ -81,11 +81,18 @@ export class AssetPipeline {
           `${result.metrics.successfulAssets} successes`
         );
       } else {
-        Logger.success(`Pipeline completed successfully!`);
+        if (this.dryRun) {
+          Logger.success(`Dry run simulation completed successfully!`);
+          Logger.info(`Would generate ${result.assets.length} assets`);
+          Logger.info(`Estimated file size: ${FileUtils.formatFileSize(result.metrics.totalFileSize)}`);
+          Logger.info(`Estimated processing time: ${result.metrics.processingTime}ms`);
+        } else {
+          Logger.success(`Pipeline completed successfully!`);
+          Logger.info(`Generated ${result.assets.length} assets`);
+          Logger.info(`Total file size: ${FileUtils.formatFileSize(result.metrics.totalFileSize)}`);
+          Logger.info(`Processing time: ${result.metrics.processingTime}ms`);
+        }
       }
-      Logger.info(`Generated ${result.assets.length} assets`);
-      Logger.info(`Total file size: ${FileUtils.formatFileSize(result.metrics.totalFileSize)}`);
-      Logger.info(`Processing time: ${result.metrics.processingTime}ms`);
 
     } catch (error) {
       Logger.error('Pipeline execution failed', error as Error);
