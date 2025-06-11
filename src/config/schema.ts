@@ -109,44 +109,7 @@ export const DEFAULT_CONFIG: PipelineConfig = {
   },
 };
 
-export function validateConfig(config: Partial<PipelineConfig>): string[] {
-  const errors: string[] = [];
 
-  if (!config.source?.images || config.source.images.length === 0) {
-    errors.push('Source images must be specified');
-  }
-
-  if (!config.output?.directory) {
-    errors.push('Output directory must be specified');
-  }
-
-  if (!config.assets || config.assets.length === 0) {
-    errors.push('At least one asset definition must be provided');
-  }
-
-  config.assets?.forEach((asset, index) => {
-    if (!asset.name) {
-      errors.push(`Asset ${index} must have a name`);
-    }
-    if (!asset.variants || asset.variants.length === 0) {
-      errors.push(`Asset ${asset.name} must have at least one variant`);
-    }
-    if (asset.source && !config.source?.images.some(img => 
-      img === asset.source || img.endsWith(asset.source as string))) {
-      errors.push(`Asset ${asset.name} references unknown source image: ${asset.source}`);
-    }
-    asset.variants?.forEach((variant, variantIndex) => {
-      if (!variant.name) {
-        errors.push(`Variant ${variantIndex} of asset ${asset.name} must have a name`);
-      }
-      if (!variant.format) {
-        errors.push(`Variant ${variant.name} must specify a format`);
-      }
-    });
-  });
-
-  return errors;
-}
 
 export function mergeWithDefaults(config: Partial<PipelineConfig>): PipelineConfig {
   return {

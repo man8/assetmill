@@ -1,5 +1,5 @@
 import { ConfigLoader } from '../config/loader';
-import { validateConfig, mergeWithDefaults } from '../config/schema';
+import { mergeWithDefaults } from '../config/schema';
 import { PipelineConfig } from '../types';
 import * as fs from 'fs-extra';
 import * as path from 'path';
@@ -250,73 +250,79 @@ assets:
 });
 
 describe('Configuration validation', () => {
-  describe('validateConfig', () => {
-    it('should validate correct configuration', () => {
-      const config: Partial<PipelineConfig> = {
-        source: {
-          images: ['logo.svg'],
-          formats: ['svg', 'png'],
-          validation: {
-            minWidth: 512,
-            minHeight: 512,
-            maxFileSize: 52428800,
-            requireTransparency: true,
-          },
-        },
-        output: {
-          directory: './assets',
-          structure: {
-            favicon: 'public/favicon',
-            social: 'assets/social',
-            logos: 'images/logos',
-            platforms: 'assets/platforms',
-          },
-          naming: {
-            template: '{name}-{width}x{height}.{format}',
-            variables: {},
-          },
-          formats: ['png', 'webp'],
-          overwrite: 'error',
-        },
-        assets: [
-          {
-            name: 'test-asset',
-            type: 'favicon',
-            variants: [
-              {
-                name: 'test-variant',
-                format: 'png',
-              },
-            ],
-          },
-        ],
-      };
-
-      const errors = validateConfig(config);
-      expect(errors).toHaveLength(0);
-    });
-
-    it('should return errors for invalid configuration', () => {
-      const config: Partial<PipelineConfig> = {
-        source: {
-          images: [],
-          formats: [],
-          validation: {
-            minWidth: 512,
-            minHeight: 512,
-            maxFileSize: 52428800,
-            requireTransparency: true,
-          },
-        },
-        output: undefined as unknown as PipelineConfig['output'],
-        assets: [],
-      };
-
-      const errors = validateConfig(config);
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors).toContain('Source images must be specified');
-      expect(errors).toContain('Output directory must be specified');
-      expect(errors).toContain('At least one asset definition must be provided');
+  describe('schema validation via ConfigLoader', () => {
+    it('should validate correct configuration', async () => {
+      const tempConfigPath = path.join(__dirname, 'temp-valid-config.yml');
+      const yamlContent = `
+source:
+  images:
+    - logo.svg
+  formats:
+    - svg
+    - png
+  validation:
+    minWidth: 512
+    minHeight: 512
+    maxFileSize: 52428800
+    requireTransparency: true
+output:
+  directory: ./assets
+  structure:
+    favicon: public/favicon
+    social: assets/social
+    logos: images/logos
+    platforms: assets/platforms
+  naming:
+    template: '{name}-{width}x{height}.{format}'
+    variables: {}
+  formats:
+    - png
+    - webp
+  overwrite: error
+assets:
+  - name: test-asset
+    type: favicon
+    variants:
+      - name: test-variant
+        format: png
+processing:
+  quality:
+    png: 90
+    jpeg: 85
+    webp: 80
+    avif: 75
+    svg: 100
+  optimisation:
+    progressive: true
+    optimise: true
+    lossless: false
+  themes:
+    light:
+      enabled: true
+      colorTransforms: []
+    dark:
+      enabled: false
+      colorTransforms: []
+    monochrome:
+      enabled: false
+      colorTransforms: []
+  contrast:
+    enabled: false
+    threshold: 0.3
+    strokeWidth: 1
+    strokeColor: '#ffffff'
+`;
+      
+      await fs.writeFile(tempConfigPath, yamlContent);
+      
+      try {
+        const loadedConfig = await ConfigLoader.load(tempConfigPath);
+        expect(loadedConfig.source.images).toBeDefined();
+        expect(loadedConfig.output.directory).toBeDefined();
+        expect(loadedConfig.assets).toBeDefined();
+      } finally {
+        await fs.remove(tempConfigPath);
+      }
     });
   });
 
