@@ -33,6 +33,11 @@ describe('ConfigLoader Error Handling', () => {
 
   describe('File permission errors', () => {
     it('should handle permission denied errors gracefully', async () => {
+      if (process.platform === 'win32') {
+        console.log('Skipping file permission test on Windows - file permissions work differently');
+        return;
+      }
+
       const restrictedPath = path.join(testDir, 'restricted.yml');
       await fs.writeFile(restrictedPath, 'test: content');
       await fs.chmod(restrictedPath, 0o000);
