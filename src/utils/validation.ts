@@ -1,10 +1,28 @@
-import { PipelineConfig, SourceImage, AssetVariant } from '../types';
+import { PipelineConfig, SourceImage, AssetVariant, MarginConfig } from '../types';
 import { FileUtils } from './file-utils';
 import { ImageProcessor } from '../processors/image-processor';
 import { normalizePath } from './path-utils';
 import path from 'path';
 
 export class ValidationUtils {
+  /**
+   * Checks if a MarginConfig has any properties defined.
+   * 
+   * @param margin The margin configuration to check
+   * @returns true if any margin properties are defined, false otherwise
+   */
+  private static hasMarginDefined(margin: MarginConfig | undefined): boolean {
+    if (!margin) return false;
+    
+    return margin.top !== undefined ||
+           margin.right !== undefined ||
+           margin.bottom !== undefined ||
+           margin.left !== undefined ||
+           margin.horizontal !== undefined ||
+           margin.vertical !== undefined ||
+           margin.all !== undefined;
+  }
+
   static async validateSourceImages(config: PipelineConfig): Promise<SourceImage[]> {
     const validatedImages: SourceImage[] = [];
     const errors: string[] = [];
@@ -76,6 +94,14 @@ export class ValidationUtils {
 
     if (variant.height && variant.height < 1) {
       errors.push('Height must be greater than 0');
+    }
+
+    if (variant.format === 'svg' && this.hasMarginDefined(variant.margin)) {
+      errors.push(
+        'Margin settings are not supported for SVG output format. ' +
+        'SVG processing uses markup transformation rather than canvas manipulation. ' +
+        'Use a raster format (PNG, JPEG, WebP, AVIF, ICO) if margins are required.'
+      );
     }
 
     return errors;

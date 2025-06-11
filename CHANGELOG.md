@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * better file system error handling with helpful guidance
 * actionable error messages that explain how to fix configuration issues
 
+### Added
+
+* validation to detect and reject invalid margin settings when SVG output format is specified, preventing silent configuration errors
+
+### Documentation
+
+* clarified that margin settings are invalid for SVG output format and will cause validation errors, with guidance to use raster formats when margins are required
+
 ### Fixed
 - Fixed misleading output messages in --dry-run mode to clearly differentiate between simulation and actual execution
 - Fixed monochrome + background combination producing completely white output instead of monochrome logo on coloured background

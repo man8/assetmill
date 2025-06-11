@@ -2,6 +2,8 @@
 
 A powerful command-line tool for automated generation of optimised image assets from source images. Designed to eliminate manual resizing and format conversion while ensuring uniform quality and specifications across all generated assets.
 
+> **⚠️ Pre-release Software**: assetmill is currently in active development (v0.3.0). Breaking changes and behaviour modifications may occur until v1.0.0 is released. Please review the [changelog](CHANGELOG.md) when updating versions.
+
 ## Why assetmill?
 
 Modern web development requires multiple image variants for different platforms, devices, and use cases. assetmill automates this process, providing:
@@ -227,14 +229,23 @@ variants:
 - Transparent margins are then added to reach the exact requested dimensions
 - This ensures output files match the specified width and height exactly
 
+**Important**: Margins are only supported for raster output formats (PNG, JPEG, WebP, AVIF, ICO). Specifying margin settings with SVG output format will result in a validation error, as SVG processing uses markup transformation rather than canvas manipulation.
+
 ```yaml
 variants:
   - name: icon-with-margin
     width: 100
     height: 100
-    format: png
+    format: png        # Margins work with raster formats
     margin:
-      all: "10%"    # Image scaled to 80x80, then 10px margins added to reach 100x100
+      all: "10%"       # Image scaled to 80x80, then 10px margins added to reach 100x100
+  
+  - name: svg-icon
+    width: 100
+    height: 100
+    format: svg        # SVG format cannot be combined with margin settings
+    # margin:          # This would cause a validation error
+    #   all: "10%"     # Use raster format if margins are required
 ```
 
 #### Resizing Behaviour
