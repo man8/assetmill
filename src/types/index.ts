@@ -109,7 +109,6 @@ export interface ProcessingConfig {
   optimisation: OptimisationConfig;
   themes: ThemeConfig;
   contrast: ContrastConfig;
-  transformationOrder?: 'themes-first' | 'background-first';
 }
 
 export interface PlatformConfig {

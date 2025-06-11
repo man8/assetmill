@@ -265,7 +265,6 @@ processing:
       enabled: true
       color: "#000000"
       threshold: 128
-  transformationOrder: themes-first  # Optional: 'themes-first' (default) or 'background-first'
 
 # Per-variant theme configuration
 variants:
@@ -284,14 +283,12 @@ variants:
 - **Colour support**: Any hex colour for monochrome output
 
 **Transformation Order**:
-The processing pipeline applies transformations in this order by default:
+The processing pipeline applies transformations in this order:
 1. **Theme processing** (including monochrome conversion)
 2. **Margin application** (if specified)
 3. **Resize and background application**
 
 This order ensures that when combining monochrome and background parameters, the monochrome theme is applied to the logo content first, then the background colour is applied separately. This produces the expected result of a monochrome logo on a coloured background.
-
-For backward compatibility, you can configure `transformationOrder: background-first` to use the legacy processing order, though this is not recommended for new projects.
 
 #### Examples
 - **Source**: 800x600 image (4:3 ratio)
