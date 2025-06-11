@@ -5,27 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.1](https://github.com/man8/assetmill/compare/v0.3.0...v0.3.1) (2025-06-11)
+
 
 ### Added
 
-* improved error reporting and validation for YAML configuration files
-* clear error messages when configuration files are missing or invalid
-* detailed YAML parsing errors with line and column numbers
-* better file system error handling with helpful guidance
-* actionable error messages that explain how to fix configuration issues
+* implement comprehensive error reporting and validation system ([#20](https://github.com/man8/assetmill/issues/20)) ([514ae15](https://github.com/man8/assetmill/commit/514ae15cfddf07f1698699e030d0e5e0560692e8))
 
-### Added
 
-* validation to detect and reject invalid margin settings when SVG output format is specified, preventing silent configuration errors
+### Changed
 
-### Documentation
+* clarify SVG margin limitations in README ([#22](https://github.com/man8/assetmill/issues/22)) ([e84d35a](https://github.com/man8/assetmill/commit/e84d35aafe8174632fdc311e1c9f6ec407108a07))
 
-* clarified that margin settings are invalid for SVG output format and will cause validation errors, with guidance to use raster formats when margins are required
-
-### Fixed
-- Fixed misleading output messages in --dry-run mode to clearly differentiate between simulation and actual execution
-- Fixed monochrome + background combination producing completely white output instead of monochrome logo on coloured background
 ## [0.3.0](https://github.com/man8/assetmill/compare/v0.2.1...v0.3.0) (2025-06-07)
 
 
