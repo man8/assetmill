@@ -4,6 +4,7 @@ import { AssetPipeline } from '../../pipeline/asset-pipeline';
 import { Logger, LogLevel } from '../../utils/logger';
 import * as path from 'path';
 import { CLIOptions, OverwriteMode } from '../../types';
+import { ConfigurationNotFoundError, ConfigurationValidationError, YamlParsingError } from '../../utils/errors';
 
 export function createGenerateCommand(): Command {
   const command = new Command('generate');
@@ -99,8 +100,24 @@ export function createGenerateCommand(): Command {
           });
         }
 
-      } catch (error) {
-        Logger.error('Command execution failed', error as Error);
+      } catch (error: unknown) {
+        if (error instanceof ConfigurationNotFoundError) {
+          Logger.error(`Configuration file not found: ${error.filePath}`);
+          Logger.info('  → Use "assetmill init" to create a configuration file');
+        } else if (error instanceof ConfigurationValidationError) {
+          Logger.error('Configuration validation failed:');
+          error.errors.forEach(err => Logger.error(`  → ${err}`));
+          Logger.info('  → Check your configuration file for syntax and structure errors');
+        } else if (error instanceof YamlParsingError) {
+          Logger.error('YAML parsing failed:');
+          Logger.error(`  → ${error.message}`);
+          Logger.info('  → Check your YAML syntax and indentation');
+        } else if (error instanceof Error && error.message.includes('Permission denied')) {
+          Logger.error(`Permission denied: ${error.message}`);
+          Logger.info('  → Check file permissions and try running with appropriate privileges');
+        } else {
+          Logger.error('Command execution failed', error as Error);
+        }
         process.exit(1);
       }
     });

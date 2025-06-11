@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "@types/svgo": "^2.6.4",
+    "ajv": "^8.17.1",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
     "fs-extra": "^11.2.0",

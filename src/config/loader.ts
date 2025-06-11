@@ -2,20 +2,61 @@ import * as fs from 'fs-extra';
 import * as yaml from 'js-yaml';
 import path from 'path';
 import { PipelineConfig } from '../types';
-import { validateConfig, mergeWithDefaults } from './schema';
+import { mergeWithDefaults } from './schema';
+import { validateConfigSchema, formatSchemaErrors } from './json-schema';
+import { FileUtils } from '../utils/file-utils';
+import { ConfigurationNotFoundError, ConfigurationValidationError, YamlParsingError } from '../utils/errors';
 
 export class ConfigLoader {
   static async load(configPath: string): Promise<PipelineConfig> {
+    const exists = await FileUtils.fileExists(configPath);
+    if (!exists) {
+      throw new ConfigurationNotFoundError(
+        `Configuration file not found: ${configPath}`,
+        configPath
+      );
+    }
+
     try {
       const configFile = await fs.readFile(configPath, 'utf8');
-      const rawConfig = yaml.load(configFile) as Partial<PipelineConfig>;
-
-      const errors = validateConfig(rawConfig);
-      if (errors.length > 0) {
-        throw new Error(`Configuration validation failed:\n${errors.join('\n')}`);
+      
+      let rawConfig: Partial<PipelineConfig>;
+      try {
+        rawConfig = yaml.load(configFile) as Partial<PipelineConfig>;
+      } catch (yamlError: unknown) {
+        const error = yamlError as { mark?: { line?: number; column?: number }; message?: string };
+        const line = error.mark?.line ? error.mark.line + 1 : undefined;
+        const column = error.mark?.column ? error.mark.column + 1 : undefined;
+        const message = line && column 
+          ? `YAML parsing error at line ${line}, column ${column}: ${error.message || 'unknown error'}`
+          : `YAML parsing error: ${error.message || 'unknown error'}`;
+        throw new YamlParsingError(message, line, column);
       }
 
       const config = mergeWithDefaults(rawConfig);
+
+      const isValid = validateConfigSchema(config);
+      if (!isValid && validateConfigSchema.errors) {
+        const errorMessages = formatSchemaErrors(validateConfigSchema.errors);
+        throw new ConfigurationValidationError(
+          `Configuration validation failed:\n${errorMessages.join('\n')}`,
+          errorMessages
+        );
+      }
+
+      for (const asset of config.assets) {
+        if (asset.source) {
+          const sourceExists = config.source.images.some(img => 
+            img === asset.source || img.endsWith(asset.source as string)
+          );
+          if (!sourceExists) {
+            throw new ConfigurationValidationError(
+              `Asset ${asset.name} references unknown source image: ${asset.source}`,
+              [`Asset ${asset.name} references unknown source image: ${asset.source}`]
+            );
+          }
+        }
+      }
       
       const configDir = path.dirname(path.resolve(configPath));
       
@@ -31,11 +72,24 @@ export class ConfigLoader {
       });
 
       return config;
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to load configuration from ${configPath}: ${error.message}`);
+    } catch (error: unknown) {
+      const err = error as { code?: string; message?: string };
+      if (err.code === 'EACCES') {
+        throw new Error(`Permission denied reading configuration file: ${configPath}`);
+      } else if (err.code === 'ENOENT') {
+        throw new ConfigurationNotFoundError(
+          `Configuration file not found: ${configPath}`,
+          configPath
+        );
       }
-      throw error;
+      
+      if (error instanceof ConfigurationNotFoundError || 
+          error instanceof ConfigurationValidationError || 
+          error instanceof YamlParsingError) {
+        throw error;
+      }
+      
+      throw new Error(`Failed to load configuration from ${configPath}: ${err.message || 'unknown error'}`);
     }
   }
 
@@ -47,7 +101,7 @@ export class ConfigLoader {
         validation: {
           minWidth: 512,
           minHeight: 512,
-          maxFileSize: '50MB',
+          maxFileSize: 52428800,
           requireTransparency: true,
         },
       },

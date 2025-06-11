@@ -235,10 +235,19 @@ export class ValidationUtils {
       const testFile = path.join(config.output.directory, '.assetmill-test');
       await FileUtils.writeTextFile(testFile, 'test');
       await FileUtils.deleteFile(testFile);
-    } catch (error) {
-      errors.push(
-        `Cannot write to output directory '${config.output.directory}': ${error}`
-      );
+    } catch (error: unknown) {
+      const err = error as { code?: string; message?: string };
+      if (err.code === 'EACCES') {
+        errors.push(`Permission denied: Cannot write to output directory ${config.output.directory}`);
+      } else if (err.code === 'ENOENT') {
+        errors.push(`Output directory does not exist and cannot be created: ${config.output.directory}`);
+      } else if (err.code === 'EMFILE' || err.code === 'ENFILE') {
+        errors.push(`Too many open files: Cannot create output directory ${config.output.directory}`);
+      } else if (err.code === 'ENOSPC') {
+        errors.push(`No space left on device: Cannot create output directory ${config.output.directory}`);
+      } else {
+        errors.push(`Cannot write to output directory ${config.output.directory}: ${err.message || 'unknown error'}`);
+      }
     }
 
     return errors;

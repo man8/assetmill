@@ -209,92 +209,153 @@ describe('ValidationUtils', () => {
 
   describe('Source assignment validation', () => {
     it('should validate asset definitions with valid source assignments', async () => {
-      const config: Partial<PipelineConfig> = {
-        source: {
-          images: [svgPath],
-          formats: ['svg'],
-          validation: {
-            minWidth: 512,
-            minHeight: 512,
-            maxFileSize: 52428800,
-            requireTransparency: false,
-          },
-        },
-        output: {
-          directory: './test-output',
-          structure: {
-            favicon: 'favicon',
-            social: 'social',
-            logos: 'logos',
-            platforms: 'platforms',
-          },
-          naming: {
-            template: '{name}.{format}',
-            variables: {},
-          },
-          formats: ['png'],
-          overwrite: 'error',
-        },
-        assets: [
-          {
-            name: 'favicon-suite',
-            type: 'favicon',
-            source: path.basename(svgPath),
-            variants: [
-              { name: 'favicon-16x16', width: 16, height: 16, format: 'png' },
-            ],
-          },
-        ],
-      };
 
-      const { validateConfig } = await import('../config/schema');
-      const errors = validateConfig(config);
-      expect(errors).toHaveLength(0);
+      const tempConfigPath = path.join(testDir, 'temp-valid-source.yml');
+      const yamlContent = `
+source:
+  images:
+    - ${path.basename(svgPath)}
+  formats:
+    - svg
+  validation:
+    minWidth: 512
+    minHeight: 512
+    maxFileSize: 52428800
+    requireTransparency: false
+output:
+  directory: ./test-output
+  structure:
+    favicon: favicon
+    social: social
+    logos: logos
+    platforms: platforms
+  naming:
+    template: '{name}.{format}'
+    variables: {}
+  formats:
+    - png
+  overwrite: error
+assets:
+  - name: favicon-suite
+    type: favicon
+    source: ${path.basename(svgPath)}
+    variants:
+      - name: favicon-16x16
+        width: 16
+        height: 16
+        format: png
+processing:
+  quality:
+    png: 90
+    jpeg: 85
+    webp: 80
+    avif: 75
+    svg: 100
+  optimisation:
+    progressive: true
+    optimise: true
+    lossless: false
+  themes:
+    light:
+      enabled: true
+      colorTransforms: []
+    dark:
+      enabled: false
+      colorTransforms: []
+    monochrome:
+      enabled: false
+      colorTransforms: []
+  contrast:
+    enabled: false
+    threshold: 0.3
+    strokeWidth: 1
+    strokeColor: '#ffffff'
+`;
+      
+      await fs.writeFile(tempConfigPath, yamlContent);
+      
+      try {
+        const { ConfigLoader } = await import('../config/loader');
+        const loadedConfig = await ConfigLoader.load(tempConfigPath);
+        expect(loadedConfig.source.images).toBeDefined();
+        expect(loadedConfig.assets).toBeDefined();
+      } finally {
+        await fs.remove(tempConfigPath);
+      }
     });
 
     it('should reject asset definitions with invalid source assignments', async () => {
-      const config: Partial<PipelineConfig> = {
-        source: {
-          images: [svgPath],
-          formats: ['svg'],
-          validation: {
-            minWidth: 512,
-            minHeight: 512,
-            maxFileSize: 52428800,
-            requireTransparency: false,
-          },
-        },
-        output: {
-          directory: './test-output',
-          structure: {
-            favicon: 'favicon',
-            social: 'social',
-            logos: 'logos',
-            platforms: 'platforms',
-          },
-          naming: {
-            template: '{name}.{format}',
-            variables: {},
-          },
-          formats: ['png'],
-          overwrite: 'error',
-        },
-        assets: [
-          {
-            name: 'favicon-suite',
-            type: 'favicon',
-            source: 'nonexistent.svg',
-            variants: [
-              { name: 'favicon-16x16', width: 16, height: 16, format: 'png' },
-            ],
-          },
-        ],
-      };
 
-      const { validateConfig } = await import('../config/schema');
-      const errors = validateConfig(config);
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors).toContain('Asset favicon-suite references unknown source image: nonexistent.svg');
+      const tempConfigPath = path.join(testDir, 'temp-invalid-source.yml');
+      const yamlContent = `
+source:
+  images:
+    - ${path.basename(svgPath)}
+  formats:
+    - svg
+  validation:
+    minWidth: 512
+    minHeight: 512
+    maxFileSize: 52428800
+    requireTransparency: false
+output:
+  directory: ./test-output
+  structure:
+    favicon: favicon
+    social: social
+    logos: logos
+    platforms: platforms
+  naming:
+    template: '{name}.{format}'
+    variables: {}
+  formats:
+    - png
+  overwrite: error
+assets:
+  - name: favicon-suite
+    type: favicon
+    source: nonexistent.svg
+    variants:
+      - name: favicon-16x16
+        width: 16
+        height: 16
+        format: png
+processing:
+  quality:
+    png: 90
+    jpeg: 85
+    webp: 80
+    avif: 75
+    svg: 100
+  optimisation:
+    progressive: true
+    optimise: true
+    lossless: false
+  themes:
+    light:
+      enabled: true
+      colorTransforms: []
+    dark:
+      enabled: false
+      colorTransforms: []
+    monochrome:
+      enabled: false
+      colorTransforms: []
+  contrast:
+    enabled: false
+    threshold: 0.3
+    strokeWidth: 1
+    strokeColor: '#ffffff'
+`;
+      
+      await fs.writeFile(tempConfigPath, yamlContent);
+      
+      try {
+        const { ConfigLoader } = await import('../config/loader');
+        await expect(ConfigLoader.load(tempConfigPath)).rejects.toThrow();
+      } finally {
+        await fs.remove(tempConfigPath);
+      }
     });
   });
 

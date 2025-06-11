@@ -7,10 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+* improved error reporting and validation for YAML configuration files
+* clear error messages when configuration files are missing or invalid
+* detailed YAML parsing errors with line and column numbers
+* better file system error handling with helpful guidance
+* actionable error messages that explain how to fix configuration issues
+
 ### Fixed
 - Fixed misleading output messages in --dry-run mode to clearly differentiate between simulation and actual execution
 - Fixed monochrome + background combination producing completely white output instead of monochrome logo on coloured background
-
 ## [0.3.0](https://github.com/man8/assetmill/compare/v0.2.1...v0.3.0) (2025-06-07)
 
 
