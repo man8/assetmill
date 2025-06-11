@@ -9,13 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* comprehensive error reporting and validation system for YAML configuration files (MAN8-4788)
-* explicit file existence checking before loading configuration files
-* JSON Schema validation with detailed field path error messages using Ajv
-* enhanced YAML parsing error reporting with line and column numbers
-* comprehensive file system error handling (permission denied, file not found)
-* custom error classes for different validation scenarios
-* actionable error messages with specific guidance for resolution
+* improved error reporting and validation for YAML configuration files
+* clear error messages when configuration files are missing or invalid
+* detailed YAML parsing errors with line and column numbers
+* better file system error handling with helpful guidance
+* actionable error messages that explain how to fix configuration issues
 
 ### Fixed
 - Fixed misleading output messages in --dry-run mode to clearly differentiate between simulation and actual execution
