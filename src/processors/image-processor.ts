@@ -222,11 +222,12 @@ export class ImageProcessor {
 
       pipeline = await this.applyThemes(pipeline, variant, options, config);
 
-      if (variant.margin || options.margin) {
-        pipeline = await this.applyMargin(pipeline, variant.margin || options.margin!, variant.width, variant.height);
-      }
-
       pipeline = this.applyBackground(pipeline, variant, options);
+
+      if (variant.margin || options.margin) {
+        pipeline = await this.applyMargin(pipeline, variant.margin || options.margin!, variant.width, variant.height,
+          this.parseBackgroundColor(variant.background || options.background));
+      }
 
       return await this.applyFormatAndSave(pipeline, variant, outputPath, options);
     } catch (error) {
@@ -241,7 +242,8 @@ export class ImageProcessor {
     pipeline: sharp.Sharp,
     margin: MarginConfig,
     targetWidth?: number,
-    targetHeight?: number
+    targetHeight?: number,
+    background?: { r: number; g: number; b: number; alpha: number }
   ): Promise<sharp.Sharp> {
     const metadata = await pipeline.metadata();
     const currentWidth = metadata.width || 0;
@@ -252,9 +254,11 @@ export class ImageProcessor {
     const contentWidth = targetWidth ? Math.max(1, targetWidth - margins.left - margins.right) : currentWidth;
     const contentHeight = targetHeight ? Math.max(1, targetHeight - margins.top - margins.bottom) : currentHeight;
     
+    const bgColor = background || { r: 0, g: 0, b: 0, alpha: 0 };
+    
     const resizedPipeline = pipeline.resize(contentWidth, contentHeight, { 
       fit: 'contain',
-      background: { r: 0, g: 0, b: 0, alpha: 0 }
+      background: bgColor
     });
     
     return resizedPipeline.extend({
@@ -262,7 +266,7 @@ export class ImageProcessor {
       bottom: margins.bottom,
       left: margins.left,
       right: margins.right,
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
+      background: bgColor,
     });
   }
 
@@ -444,11 +448,12 @@ export class ImageProcessor {
 
       pipeline = await this.applyThemes(pipeline, variant, options, config);
 
-      if (variant.margin || options.margin) {
-        pipeline = await this.applyMargin(pipeline, variant.margin || options.margin!);
-      }
-
       pipeline = this.applyBackground(pipeline, sizeVariant, options);
+
+      if (variant.margin || options.margin) {
+        pipeline = await this.applyMargin(pipeline, variant.margin || options.margin!, size, size,
+          this.parseBackgroundColor(variant.background || options.background));
+      }
       
       const buffer = await pipeline.png().toBuffer();
       buffers.push(buffer);
