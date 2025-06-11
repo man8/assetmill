@@ -88,16 +88,14 @@ export class ImageProcessor {
     return pipeline;
   }
 
-  private static applyResizeAndBackground(
+  private static applyResize(
     pipeline: sharp.Sharp,
-    variant: AssetVariant,
-    options: ProcessingOptions = {}
+    variant: AssetVariant
   ): sharp.Sharp {
     if (variant.width || variant.height) {
-      const backgroundColor = this.parseBackgroundColor(variant.background || options.background);
       const resizeOptions: sharp.ResizeOptions = {
         fit: 'contain',
-        background: backgroundColor,
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
       };
 
       if (variant.width && variant.height) {
@@ -110,21 +108,40 @@ export class ImageProcessor {
       }
 
       pipeline = pipeline.resize(resizeOptions);
-      
-      if (variant.background || options.background) {
-        pipeline = pipeline.flatten({ background: backgroundColor });
-      }
     }
 
     return pipeline;
   }
 
-  private static applyThemes(
+  private static applyBackground(
+    pipeline: sharp.Sharp,
+    variant: AssetVariant,
+    options: ProcessingOptions = {}
+  ): sharp.Sharp {
+    if (variant.background || options.background) {
+      const backgroundColor = this.parseBackgroundColor(variant.background || options.background);
+      pipeline = pipeline.flatten({ background: backgroundColor });
+    }
+
+    return pipeline;
+  }
+
+  private static applyResizeAndBackground(
+    pipeline: sharp.Sharp,
+    variant: AssetVariant,
+    options: ProcessingOptions = {}
+  ): sharp.Sharp {
+    pipeline = this.applyResize(pipeline, variant);
+    pipeline = this.applyBackground(pipeline, variant, options);
+    return pipeline;
+  }
+
+  private static async applyThemes(
     pipeline: sharp.Sharp,
     variant: AssetVariant,
     options: ProcessingOptions = {},
     config?: PipelineConfig
-  ): sharp.Sharp {
+  ): Promise<sharp.Sharp> {
     if (variant.theme === 'dark' || options.theme === 'dark') {
       pipeline = pipeline.negate({ alpha: false });
     } else if (variant.theme === 'monochrome' || options.theme === 'monochrome' || variant.monochrome) {
@@ -132,7 +149,7 @@ export class ImageProcessor {
         variant.monochrome, 
         config?.processing?.themes?.monochrome
       );
-      pipeline = this.applyMonochromeTheme(pipeline, monochromeConfig);
+      pipeline = await this.applyMonochromeTheme(pipeline, monochromeConfig);
     }
 
     return pipeline;
@@ -201,13 +218,15 @@ export class ImageProcessor {
       let pipeline = this.setupBasePipeline(sourceImage);
       await pipeline.metadata();
 
-      pipeline = this.applyResizeAndBackground(pipeline, variant, options);
+      pipeline = this.applyResize(pipeline, variant);
+
+      pipeline = await this.applyThemes(pipeline, variant, options, config);
 
       if (variant.margin || options.margin) {
         pipeline = await this.applyMargin(pipeline, variant.margin || options.margin!, variant.width, variant.height);
       }
 
-      pipeline = this.applyThemes(pipeline, variant, options, config);
+      pipeline = this.applyBackground(pipeline, variant, options);
 
       return await this.applyFormatAndSave(pipeline, variant, outputPath, options);
     } catch (error) {
@@ -421,13 +440,15 @@ export class ImageProcessor {
       let pipeline = this.setupBasePipeline(sourceImage);
       
       const sizeVariant = { ...variant, width: size, height: size };
-      pipeline = this.applyResizeAndBackground(pipeline, sizeVariant, options);
+      pipeline = this.applyResize(pipeline, sizeVariant);
+
+      pipeline = await this.applyThemes(pipeline, variant, options, config);
 
       if (variant.margin || options.margin) {
         pipeline = await this.applyMargin(pipeline, variant.margin || options.margin!);
       }
 
-      pipeline = this.applyThemes(pipeline, variant, options, config);
+      pipeline = this.applyBackground(pipeline, sizeVariant, options);
       
       const buffer = await pipeline.png().toBuffer();
       buffers.push(buffer);
@@ -487,25 +508,45 @@ export class ImageProcessor {
     return { color: '#000000', threshold: 128 };
   }
 
-  private static applyMonochromeTheme(pipeline: sharp.Sharp, config: MonochromeConfig): sharp.Sharp {
-    pipeline = pipeline.greyscale();
-    
+  private static async applyMonochromeTheme(pipeline: sharp.Sharp, config: MonochromeConfig): Promise<sharp.Sharp> {
     const threshold = config.threshold || 128;
     const color = config.color || '#000000';
     
-    if (color === '#ffffff' || color === '#fff') {
-      const whiteThreshold = threshold < 100 ? threshold : 64;
-      pipeline = pipeline.threshold(whiteThreshold, { greyscale: false });
-    } else if (color === '#000000' || color === '#000') {
-      pipeline = pipeline.threshold(threshold);
-    } else {
-      const customThreshold = threshold < 100 ? threshold : 64;
-      pipeline = pipeline.threshold(customThreshold, { greyscale: false });
-      const rgb = this.hexToRgb(color);
-      pipeline = pipeline.tint(rgb);
+    const originalBuffer = await pipeline.png().toBuffer();
+    const { data: originalData, info } = await sharp(originalBuffer).raw().toBuffer({ resolveWithObject: true });
+    
+    const maskData = Buffer.alloc(info.width * info.height);
+    for (let i = 0; i < originalData.length; i += info.channels) {
+      const pixelIndex = Math.floor(i / info.channels);
+      const alpha = info.channels === 4 ? originalData[i + 3] : 255;
+      maskData[pixelIndex] = alpha > 0 ? 255 : 0; // Binary mask: opaque or transparent
     }
     
-    return pipeline;
+    const maskImage = sharp(maskData, {
+      raw: { width: info.width, height: info.height, channels: 1 }
+    }).png();
+    
+    let processedPipeline = sharp(originalBuffer).greyscale();
+    
+    if (color === '#ffffff' || color === '#fff') {
+      const whiteThreshold = threshold < 100 ? threshold : 64;
+      processedPipeline = processedPipeline.threshold(whiteThreshold, { greyscale: false });
+    } else if (color === '#000000' || color === '#000') {
+      processedPipeline = processedPipeline.threshold(threshold, { greyscale: false }).negate({ alpha: false });
+    } else {
+      const customThreshold = threshold < 100 ? threshold : 64;
+      processedPipeline = processedPipeline.threshold(customThreshold, { greyscale: false });
+      const rgb = this.hexToRgb(color);
+      processedPipeline = processedPipeline.tint(rgb);
+    }
+    
+    const processedBuffer = await processedPipeline.png().toBuffer();
+    const maskBuffer = await maskImage.toBuffer();
+    
+    return sharp(processedBuffer).composite([{
+      input: maskBuffer,
+      blend: 'dest-in'
+    }]);
   }
 
   private static parseSvgConfig(variant: AssetVariant): Record<string, unknown> {
