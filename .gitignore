@@ -90,9 +90,6 @@ public
 tmp/
 temp/
 
-# PR description files
-pr-description.md
-
 # Logs
 logs
 *.log
