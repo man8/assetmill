@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * better file system error handling with helpful guidance
 * actionable error messages that explain how to fix configuration issues
 
+### Documentation
+
+* clarified that margin settings only apply to raster output formats (PNG, JPEG, WebP, AVIF, ICO) and are ignored for SVG output due to technical limitations
+
 ### Fixed
 - Fixed misleading output messages in --dry-run mode to clearly differentiate between simulation and actual execution
 - Fixed monochrome + background combination producing completely white output instead of monochrome logo on coloured background

@@ -227,14 +227,23 @@ variants:
 - Transparent margins are then added to reach the exact requested dimensions
 - This ensures output files match the specified width and height exactly
 
+**Important**: Margins are only supported for raster output formats (PNG, JPEG, WebP, AVIF, ICO). SVG output does not support margins as it uses markup transformation rather than canvas manipulation.
+
 ```yaml
 variants:
   - name: icon-with-margin
     width: 100
     height: 100
-    format: png
+    format: png        # Margins work with raster formats
     margin:
-      all: "10%"    # Image scaled to 80x80, then 10px margins added to reach 100x100
+      all: "10%"       # Image scaled to 80x80, then 10px margins added to reach 100x100
+  
+  - name: svg-icon
+    width: 100
+    height: 100
+    format: svg        # Margins are ignored for SVG output
+    margin:
+      all: "10%"       # This margin setting will have no effect
 ```
 
 #### Resizing Behaviour
