@@ -153,4 +153,59 @@ describe('SVG dimension handling', () => {
     expect(outputContent).toMatch(/width="100"/);
     expect(outputContent).toMatch(/height="100"/);
   });
+
+  it('should not incorrectly match stroke-width attributes when checking for width', () => {
+    const svgContent = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
+      '<circle stroke-width="5" cx="50" cy="50" r="30"/></svg>';
+    const variant: AssetVariant = {
+      name: 'test',
+      format: 'svg',
+      width: 200,
+      height: 200
+    };
+
+    const result = ImageProcessor['applySvgAttributes'](svgContent, ImageProcessor['parseSvgConfig'](variant));
+
+    expect(result).toContain('width="200"');
+    expect(result).toContain('height="200"');
+    expect(result).toContain('stroke-width="5"');
+  });
+
+  it('should prioritise variant dimensions over svg config dimensions', () => {
+    const variant: AssetVariant = {
+      name: 'test',
+      format: 'svg',
+      width: 300,
+      height: 400,
+      svg: {
+        monochrome: '#ff0000',
+        simplified: true
+      }
+    };
+
+    const config = ImageProcessor['parseSvgConfig'](variant);
+    
+    expect(config.width).toBe(300);
+    expect(config.height).toBe(400);
+    expect(config.monochrome).toBe('#ff0000');
+    expect(config.simplified).toBe(true);
+  });
+
+  it('should handle multiple stroke-width attributes without false positives', () => {
+    const svgContent = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
+      '<rect stroke-width="2" x="10" y="10"/><circle stroke-width="3" cx="50" cy="50"/></svg>';
+    const variant: AssetVariant = {
+      name: 'test',
+      format: 'svg',
+      width: 500
+    };
+
+    const result = ImageProcessor['applySvgAttributes'](svgContent, ImageProcessor['parseSvgConfig'](variant));
+
+    expect(result).toContain('width="500"');
+    expect(result).toContain('stroke-width="2"');
+    expect(result).toContain('stroke-width="3"');
+    expect(result).toMatch(/<svg[^>]*width="500"/);
+    expect(result.match(/stroke-width="/g)).toHaveLength(2);
+  });
 });

@@ -551,14 +551,14 @@ export class ImageProcessor {
 
   private static parseSvgConfig(variant: AssetVariant): Record<string, unknown> {
     return {
+      ...variant.svg,
       monochrome: variant.monochrome || variant.svg?.monochrome,
       simplified: variant.simplified || variant.svg?.simplified,
       viewBox: variant.viewBox || variant.svg?.viewBox,
       preserveAspectRatio: variant.preserveAspectRatio || variant.svg?.preserveAspectRatio,
       colorTransforms: variant.colorTransforms || variant.svg?.colorTransforms,
       width: variant.width,
-      height: variant.height,
-      ...variant.svg
+      height: variant.height
     };
   }
 
@@ -609,10 +609,10 @@ export class ImageProcessor {
     }
     
     if (svgConfig.width) {
-      if (optimisedSvg.includes('width=')) {
+      if (/<svg[^>]*\swidth=/.test(optimisedSvg)) {
         optimisedSvg = optimisedSvg.replace(
-          /width="[^"]{0,50}"/,
-          `width="${svgConfig.width}"`
+          /<svg([^>]*)\swidth="[^"]*"/,
+          `<svg$1 width="${svgConfig.width}"`
         );
       } else {
         optimisedSvg = optimisedSvg.replace(
@@ -623,10 +623,10 @@ export class ImageProcessor {
     }
     
     if (svgConfig.height) {
-      if (optimisedSvg.includes('height=')) {
+      if (/<svg[^>]*\sheight=/.test(optimisedSvg)) {
         optimisedSvg = optimisedSvg.replace(
-          /height="[^"]{0,50}"/,
-          `height="${svgConfig.height}"`
+          /<svg([^>]*)\sheight="[^"]*"/,
+          `<svg$1 height="${svgConfig.height}"`
         );
       } else {
         optimisedSvg = optimisedSvg.replace(
