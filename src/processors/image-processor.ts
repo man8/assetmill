@@ -556,6 +556,8 @@ export class ImageProcessor {
       viewBox: variant.viewBox || variant.svg?.viewBox,
       preserveAspectRatio: variant.preserveAspectRatio || variant.svg?.preserveAspectRatio,
       colorTransforms: variant.colorTransforms || variant.svg?.colorTransforms,
+      width: variant.width,
+      height: variant.height,
       ...variant.svg
     };
   }
@@ -602,6 +604,34 @@ export class ImageProcessor {
         optimisedSvg = optimisedSvg.replace(
           /<svg\s+([^>]{0,1000}?)>/,
           `<svg $1 preserveAspectRatio="${svgConfig.preserveAspectRatio}">`
+        );
+      }
+    }
+    
+    if (svgConfig.width) {
+      if (optimisedSvg.includes('width=')) {
+        optimisedSvg = optimisedSvg.replace(
+          /width="[^"]{0,50}"/,
+          `width="${svgConfig.width}"`
+        );
+      } else {
+        optimisedSvg = optimisedSvg.replace(
+          /<svg\s+([^>]{0,1000}?)>/,
+          `<svg $1 width="${svgConfig.width}">`
+        );
+      }
+    }
+    
+    if (svgConfig.height) {
+      if (optimisedSvg.includes('height=')) {
+        optimisedSvg = optimisedSvg.replace(
+          /height="[^"]{0,50}"/,
+          `height="${svgConfig.height}"`
+        );
+      } else {
+        optimisedSvg = optimisedSvg.replace(
+          /<svg\s+([^>]{0,1000}?)>/,
+          `<svg $1 height="${svgConfig.height}">`
         );
       }
     }
