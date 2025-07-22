@@ -208,4 +208,17 @@ describe('SVG dimension handling', () => {
     expect(result).toMatch(/<svg[^>]*width="500"/);
     expect(result.match(/stroke-width="/g)).toHaveLength(2);
   });
+
+  it('should fallback to original content when SVG parsing fails', () => {
+    const malformedSvg = '<svg><unclosed-tag></svg>';
+    const variant: AssetVariant = {
+      name: 'test',
+      format: 'svg',
+      width: 200
+    };
+
+    const result = ImageProcessor['applySvgAttributes'](malformedSvg, ImageProcessor['parseSvgConfig'](variant));
+    
+    expect(result).toBe(malformedSvg);
+  });
 });
