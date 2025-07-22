@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * add build step to prepublishOnly script ([#13](https://github.com/man8/assetmill/issues/13)) ([f7ece27](https://github.com/man8/assetmill/commit/f7ece27fa5e920f9fab3d764a5237007a81b848e))
-* implement overwrite control feature (MAN8-4764) ([#16](https://github.com/man8/assetmill/issues/16)) ([63bd189](https://github.com/man8/assetmill/commit/63bd18971ddf8ad18dfc6360d8c432ace7e0c85b))
+* implement overwrite control feature ([#16](https://github.com/man8/assetmill/issues/16)) ([63bd189](https://github.com/man8/assetmill/commit/63bd18971ddf8ad18dfc6360d8c432ace7e0c85b))
 * **release:** automate changelog management and version workflows ([638fe0b](https://github.com/man8/assetmill/commit/638fe0b1290ecf2f3ddd356224c8562a3375958f))
 * **release:** migrate to commit-and-tag-version for automated release management ([8e75db7](https://github.com/man8/assetmill/commit/8e75db72fb0ea33d813bde7c969fb7c5c31fee90))
 
