@@ -63,6 +63,7 @@
     "fs-extra": "^11.2.0",
     "glob": "^10.3.0",
     "js-yaml": "^4.1.0",
+    "jsdom": "^26.1.0",
     "ora": "^8.0.1",
     "sharp": "^0.34.2",
     "svgo": "^3.3.2"
@@ -71,6 +72,7 @@
     "@types/fs-extra": "^11.0.4",
     "@types/jest": "^29.5.8",
     "@types/js-yaml": "^4.0.9",
+    "@types/jsdom": "^21.1.7",
     "@types/node": "^20.17.57",
     "@typescript-eslint/eslint-plugin": "^8.33.0",
     "@typescript-eslint/parser": "^8.33.0",

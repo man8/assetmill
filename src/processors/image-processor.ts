@@ -2,6 +2,7 @@ import sharp from 'sharp';
 import path from 'path';
 import * as fs from 'fs-extra';
 import { optimize as svgoOptimize, Config as SvgoConfig, PluginConfig } from 'svgo';
+import { JSDOM } from 'jsdom';
 import { 
   SourceImage, 
   AssetVariant, 
@@ -551,12 +552,14 @@ export class ImageProcessor {
 
   private static parseSvgConfig(variant: AssetVariant): Record<string, unknown> {
     return {
+      ...variant.svg,
       monochrome: variant.monochrome || variant.svg?.monochrome,
       simplified: variant.simplified || variant.svg?.simplified,
       viewBox: variant.viewBox || variant.svg?.viewBox,
       preserveAspectRatio: variant.preserveAspectRatio || variant.svg?.preserveAspectRatio,
       colorTransforms: variant.colorTransforms || variant.svg?.colorTransforms,
-      ...variant.svg
+      width: variant.width,
+      height: variant.height
     };
   }
 
@@ -585,28 +588,41 @@ export class ImageProcessor {
   }
 
   private static applySvgAttributes(optimisedSvg: string, svgConfig: Record<string, unknown>): string {
-    if (svgConfig.viewBox) {
-      optimisedSvg = optimisedSvg.replace(
-        /viewBox="[^"]{0,100}"/,
-        `viewBox="${svgConfig.viewBox}"`
-      );
-    }
-    
-    if (svgConfig.preserveAspectRatio) {
-      if (optimisedSvg.includes('preserveAspectRatio=')) {
-        optimisedSvg = optimisedSvg.replace(
-          /preserveAspectRatio="[^"]{0,50}"/,
-          `preserveAspectRatio="${svgConfig.preserveAspectRatio}"`
-        );
-      } else {
-        optimisedSvg = optimisedSvg.replace(
-          /<svg\s+([^>]{0,1000}?)>/,
-          `<svg $1 preserveAspectRatio="${svgConfig.preserveAspectRatio}">`
-        );
+    try {
+      const dom = new JSDOM(optimisedSvg, { contentType: 'image/svg+xml' });
+      const svgElement = dom.window.document.querySelector('svg');
+      
+      if (!svgElement) {
+        console.warn('No SVG element found in optimised SVG content');
+        return optimisedSvg;
       }
+      
+      const originalViewBox = svgElement.getAttribute('viewBox');
+      if (originalViewBox && !svgConfig.viewBox) {
+        svgElement.setAttribute('viewBox', originalViewBox);
+      }
+      
+      if (svgConfig.viewBox) {
+        svgElement.setAttribute('viewBox', String(svgConfig.viewBox));
+      }
+      
+      if (svgConfig.preserveAspectRatio) {
+        svgElement.setAttribute('preserveAspectRatio', String(svgConfig.preserveAspectRatio));
+      }
+      
+      if (svgConfig.width) {
+        svgElement.setAttribute('width', String(svgConfig.width));
+      }
+      
+      if (svgConfig.height) {
+        svgElement.setAttribute('height', String(svgConfig.height));
+      }
+      
+      return dom.serialize();
+    } catch (error) {
+      console.warn('Failed to parse SVG with jsdom, falling back to original content:', error);
+      return optimisedSvg;
     }
-    
-    return optimisedSvg;
   }
 
   private static async processSvgOutput(
@@ -650,7 +666,14 @@ export class ImageProcessor {
 
     const svgoConfig: SvgoConfig = {
       plugins: [
-        'preset-default',
+        {
+          name: 'preset-default',
+          params: {
+            overrides: {
+              removeViewBox: false
+            }
+          }
+        },
         ...svgoPlugins
       ]
     };
