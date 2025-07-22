@@ -221,4 +221,71 @@ describe('SVG dimension handling', () => {
     
     expect(result).toBe(malformedSvg);
   });
+
+  it('should preserve viewBox for proper content scaling when dimensions change', async () => {
+    const testSvgWithViewBox = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="50" r="40" fill="blue"/>
+</svg>`;
+    
+    const testSvgPath = path.join(testDir, 'test-viewbox.svg');
+    await fs.writeFile(testSvgPath, testSvgWithViewBox);
+    
+    const sourceImage: SourceImage = {
+      path: testSvgPath,
+      format: 'svg',
+      width: 100,
+      height: 100
+    };
+    
+    const variant: AssetVariant = {
+      name: 'test-scaled',
+      width: 200,
+      height: 200,
+      format: 'svg'
+    };
+    
+    const outputPath = path.join(testDir, 'output-scaled.svg');
+    
+    await ImageProcessor.processImage(sourceImage, variant, outputPath);
+    
+    const outputContent = await fs.readFile(outputPath, 'utf-8');
+    expect(outputContent).toMatch(/width="200"/);
+    expect(outputContent).toMatch(/height="200"/);
+    expect(outputContent).toMatch(/viewBox="0 0 100 100"/);
+  });
+
+  it('should respect explicit viewBox configuration over preserved viewBox', async () => {
+    const testSvgWithViewBox = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="50" r="40" fill="blue"/>
+</svg>`;
+    
+    const testSvgPath = path.join(testDir, 'test-explicit-viewbox.svg');
+    await fs.writeFile(testSvgPath, testSvgWithViewBox);
+    
+    const sourceImage: SourceImage = {
+      path: testSvgPath,
+      format: 'svg',
+      width: 100,
+      height: 100
+    };
+    
+    const variant: AssetVariant = {
+      name: 'test-explicit',
+      width: 300,
+      height: 300,
+      format: 'svg',
+      viewBox: '0 0 300 300'
+    };
+    
+    const outputPath = path.join(testDir, 'output-explicit.svg');
+    
+    await ImageProcessor.processImage(sourceImage, variant, outputPath);
+    
+    const outputContent = await fs.readFile(outputPath, 'utf-8');
+    expect(outputContent).toMatch(/width="300"/);
+    expect(outputContent).toMatch(/height="300"/);
+    expect(outputContent).toMatch(/viewBox="0 0 300 300"/);
+  });
 });

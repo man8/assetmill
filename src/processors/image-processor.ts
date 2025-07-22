@@ -597,6 +597,11 @@ export class ImageProcessor {
         return optimisedSvg;
       }
       
+      const originalViewBox = svgElement.getAttribute('viewBox');
+      if (originalViewBox && !svgConfig.viewBox) {
+        svgElement.setAttribute('viewBox', originalViewBox);
+      }
+      
       if (svgConfig.viewBox) {
         svgElement.setAttribute('viewBox', String(svgConfig.viewBox));
       }
@@ -661,7 +666,14 @@ export class ImageProcessor {
 
     const svgoConfig: SvgoConfig = {
       plugins: [
-        'preset-default',
+        {
+          name: 'preset-default',
+          params: {
+            overrides: {
+              removeViewBox: false
+            }
+          }
+        },
         ...svgoPlugins
       ]
     };
