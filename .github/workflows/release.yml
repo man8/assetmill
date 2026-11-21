@@ -69,7 +69,7 @@ jobs:
         echo "Generated release notes for version $RELEASE_VERSION"
     
     - name: Publish to npm
-      run: npm publish
+      run: npm stage publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     
